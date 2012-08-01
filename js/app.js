@@ -165,7 +165,7 @@
 		//帮助主菜单
 		var menuHelp = new air.NativeMenu();
 
-		var menuItemManual = menuHelp.addItem(new air.NativeMenuItem('使用手册'));
+		var menuItemManual = menuHelp.addItem(new air.NativeMenuItem('使用指南'));
 		menuItemManual.name = 'manual';
 		menuItemManual.addEventListener(air.Event.SELECT, app.menuSelect);
 
@@ -274,7 +274,7 @@
 			app.execTools(target.data);
 			break;
 		case 'manual':
-			air.navigateToURL(new air.URLRequest('http://www.alibaba.com/'));
+			app.showManual();
 			break;
 		case 'about':
 			app.showAbout();
@@ -731,19 +731,17 @@
 
 	//添加新方案
 	app.addHosts = function(){
-		jDialog.prompt('请输入新方案名字！','', function(e){
-			var hostsName = e.data;
-			if(e.type ==='ok' && hostsName){
-				var hostsList = settings.get('hostsList');
-				hostsList.push({
-					name: hostsName,
-					content: ''
-				});
-				settings.set('curHost', hostsList.length-1);
-				app.updateHostMenu();
-				app.loadCurHost();
-			}
-		});
+		var hostsName = prompt('请输入新方案名字！','');
+		if(hostsName){
+			var hostsList = settings.get('hostsList');
+			hostsList.push({
+				name: hostsName,
+				content: ''
+			});
+			settings.set('curHost', hostsList.length-1);
+			app.updateHostMenu();
+			app.loadCurHost();
+		}
 	}
 
 	//删除当前方案
@@ -771,6 +769,11 @@
 		settings.set('curHost', curHost);
 		app.updateHostMenu();
 		app.loadCurHost();
+	}
+
+	//显示使用指南
+	app.showManual = function(){
+		air.navigateToURL(new air.URLRequest('https://github.com/yaniswang/hostsPlus/wiki/manual'));
 	}
 
 	_win.app = app;

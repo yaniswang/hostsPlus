@@ -31,6 +31,7 @@
 		var $win = $(window);
 		//全局键盘快捷键
 		$win.on('keydown',function(e){
+			air.trace(e.which);
 			switch(e.which){
 				case 9://Tab
 					if(e.ctrlKey){
@@ -41,6 +42,9 @@
 				case 27://Esc
 					app.hide();
 					return false;
+					break;
+				case 112://F1
+					app.showManual();
 					break;
 				case 122://F11
 					app.toggleFullscreen();

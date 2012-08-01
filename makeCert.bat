@@ -1,0 +1,1 @@
+adt -certificate -cn SelfSigned 1024-RSA cert.pfx hostsplus

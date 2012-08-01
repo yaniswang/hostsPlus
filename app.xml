@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<application xmlns="http://ns.adobe.com/air/application/3.3">
+	<id>hostsplus</id>
+	<name>hostsPlus</name>
+	<filename>hostsPlus</filename>
+	<versionNumber>0.9.1</versionNumber>
+	<versionLabel>0.9.1</versionLabel>
+	<description>
+		<text xml:lang="en">hostsPlus is a editor for hosts.</text>
+		<text xml:lang="zh-cn">hostsPlus是一个hosts增强编辑软件。</text>
+	</description>
+	<supportedProfiles>extendedDesktop desktop</supportedProfiles>
+	<initialWindow>
+		<content>index.html</content>
+		<systemChrome>standard</systemChrome>
+		<transparent>false</transparent>
+		<visible>false</visible>
+		<minimizable>true</minimizable>
+		<maximizable>true</maximizable>
+		<resizable>true</resizable>
+		<width>1024</width>
+		<height>768</height>
+	</initialWindow>
+	<icon>
+		<image16x16>icons/icon16.png</image16x16>
+		<image32x32>icons/icon32.png</image32x32>
+		<image48x48>icons/icon48.png</image48x48>
+		<image128x128>icons/icon128.png</image128x128>
+	</icon>
+	<customUpdateUI>false</customUpdateUI>
+	<copyright>Copyright alibaba.com</copyright>
+</application>

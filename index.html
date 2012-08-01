@@ -1,0 +1,55 @@
+<!DOCTYPE html> 
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>hostsPlus</title>
+	<link rel="stylesheet" type="text/css" href="css/index.css" />
+	<link rel="stylesheet" type="text/css" href="css/dialog_skins/tip.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/dialog_skins/easyui.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/codemirror.css" />
+	<script type="text/javascript" src="js/AIRAliases.js"></script>
+	<script type="text/javascript" src="js/AIRIntrospector.js"></script>
+	<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="js/common.js"></script>
+	<script type="text/javascript" src="js/jdialog.js"></script>
+	<script type="text/javascript" src="js/settings.js"></script>
+	<script type="text/javascript" src="js/hosts.js"></script>
+	<script type="text/javascript" src="js/codemirror.js"></script>
+	<script type="text/javascript" src="js/codemirror-hosts.js"></script>
+	<script type="text/javascript" src="js/editor.js"></script>
+	<script type="text/javascript" src="js/app.js"></script>
+	<script type="text/javascript">
+		jDialog.settings.skin = 'easyui';
+		jDialog.settings.animate = false;
+		
+		$(app.init);
+		//关闭按钮
+		nativeWindow.addEventListener(air.Event.CLOSING, function(event){
+			event.preventDefault();
+			app.hide(); 
+		});
+		var $win = $(window);
+		//全局键盘快捷键
+		$win.on('keydown',function(e){
+			switch(e.which){
+				case 9://Tab
+					if(e.ctrlKey){
+						app.toggleHosts();
+						return false;
+					}
+					break;
+				case 27://Esc
+					app.hide();
+					return false;
+					break;
+				case 122://F11
+					app.toggleFullscreen();
+					return false;
+					break;
+			}
+		});		
+
+	</script>
+</head> 
+<body></body> 
+</html>

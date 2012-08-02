@@ -15,6 +15,8 @@
 	var defaultSettings={
 		//是否开机自动启动
 		bStartAtLogin: false,
+		//开启后自动隐藏
+		bHideAfterStart: false,
 		//hosts方案列表
 		hostsList:[],
 		curHost:-1,

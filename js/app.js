@@ -19,8 +19,6 @@
 	//软件初始化
 	app.init = function() {
 
-		app.toggleFullscreen();
-
 		var hostsList = settings.get('hostsList'),
 			curHost = settings.get('curHost');
 		//首次打开软件，读取系统默认hosts文件
@@ -68,6 +66,11 @@
 		});
 
 		app.loadCurHost();
+
+		app.toggleFullscreen();	
+		if(settings.get('bHideAfterStart')){
+			app.hide();
+		}
 
 	}
 
@@ -711,18 +714,21 @@
 
 	//显示首选项
 	app.showPreference = function(){
-		var $preference = $('<div class="appdialog preference"><p><label for="bStartAtLogin">开机启动：</label> <input id="bStartAtLogin" type="checkbox" /></p><p class="buttonline"><button id="btnSave">保存修改</button></p></div>');
+		var $preference = $('<div class="appdialog preference"><p><label for="bStartAtLogin">开机启动：</label> <input id="bStartAtLogin" type="checkbox" /></p><p><label for="bHideAfterStart">启动后隐藏：</label> <input id="bHideAfterStart" type="checkbox" /></p><p class="buttonline"><button id="btnSave">保存修改</button></p></div>');
 		var $bStartAtLogin = $('#bStartAtLogin', $preference),
-		$btnSave = $('#btnSave', $preference);
+			$bHideAfterStart = $('#bHideAfterStart', $preference),
+			$btnSave = $('#btnSave', $preference);
 		dialog.setTitle('首选项').setContent($preference).moveTo().show();
 
-		var bStartAtLogin = settings.get('bStartAtLogin');
+		var bStartAtLogin = settings.get('bStartAtLogin'), bHideAfterStart = settings.get('bHideAfterStart');
 
 		$bStartAtLogin.attr('checked', bStartAtLogin ? true : false);
+		$bHideAfterStart.attr('checked', bHideAfterStart ? true : false);
 
 		$btnSave.click(function(){
 			bStartAtLogin = $bStartAtLogin.attr('checked') ? true : false;
 			settings.set('bStartAtLogin', bStartAtLogin);
+			settings.set('bHideAfterStart', $bHideAfterStart.attr('checked') ? true : false);
 			app.setStartAtLogin(bStartAtLogin);
 			alert('修改成功');
 			dialog.hide();

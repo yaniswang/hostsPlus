@@ -770,11 +770,13 @@
 	//切换方案
 	app.toggleHosts = function(){
 		var hostsList = settings.get('hostsList'), curHost = settings.get('curHost');
-		curHost ++;
-		if(curHost>=hostsList.length)curHost = 0;
-		settings.set('curHost', curHost);
-		app.updateHostMenu();
-		app.loadCurHost();
+		var newCurHost = curHost + 1;
+		if(newCurHost>=hostsList.length)newCurHost = 0;
+		if(newCurHost !== curHost){
+			settings.set('curHost', newCurHost);
+			app.updateHostMenu();
+			app.loadCurHost();
+		}
 	}
 
 	//显示使用指南

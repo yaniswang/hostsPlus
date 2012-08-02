@@ -10,6 +10,7 @@
 	var editor = $({});
 	var codeMirror, $codeMirrorInput;
 	var bWorking = false;
+	var groupId = 1;
 
 	//编辑器初始化
 	editor.init = function() {
@@ -23,6 +24,9 @@
 				},
 				"Ctrl-/": function() {
 					editor.toogleSelectionLine();
+				},
+				"Ctrl-G": function() {
+					editor.addNewGroup();
 				},
 				"Ctrl-S": function() {
 					editor.trigger('save');
@@ -159,6 +163,21 @@
 		codeMirror.setCursor({line:line,ch:0});
 		var pos = codeMirror.charCoords({line:line,ch:0}, 'local');
 		codeMirror.scrollTo(pos.x, pos.y);
+	}
+
+	//新建分组
+	editor.addNewGroup = function(){
+		var fromLine = codeMirror.getCursor(true).line, strLine, strPrevLine;
+		var regGroup = /^\s*#\s*=+[^=]+=+/;
+		strLine = codeMirror.getLine(fromLine);
+		if(fromLine>0){
+			strPrevLine = codeMirror.getLine(fromLine-1);
+		}
+		if(fromLine === 0 || !(regGroup.test(strLine) || regGroup.test(strPrevLine))){
+			var strGroupId = 'group ' + groupId++;
+			codeMirror.setLine(fromLine, '\r\n# ==================== ' + strGroupId + ' ====================\r\n' + strLine);
+			codeMirror.setSelection({line:fromLine+1, ch:23}, {line:fromLine+1, ch:23 + strGroupId.length});
+		}
 	}
 
 	_win.editor = editor;

@@ -726,7 +726,7 @@
 
 	//显示首选项
 	app.showPreference = function(){
-		var $preference = $('<div class="appdialog preference"><p'+(isLinux?' style="display:none;"':'')+'><label for="bStartAtLogin">开机启动：</label> <input id="bStartAtLogin" type="checkbox" /></p><p><label for="bHideAfterStart">启动后隐藏：</label> <input id="bHideAfterStart" type="checkbox" /></p><p class="buttonline"><button id="btnSave">保存修改</button></p></div>');
+		var $preference = $('<div class="appdialog preference"><p><label for="bStartAtLogin">开机启动：</label> <input id="bStartAtLogin" type="checkbox" /></p><p><label for="bHideAfterStart">启动后隐藏：</label> <input id="bHideAfterStart" type="checkbox" /></p><p class="buttonline"><button id="btnSave">保存修改</button></p></div>');
 		var $bStartAtLogin = $('#bStartAtLogin', $preference),
 			$bHideAfterStart = $('#bHideAfterStart', $preference),
 			$btnSave = $('#btnSave', $preference);

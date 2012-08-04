@@ -53,6 +53,7 @@
 			app.updateGroupMenu();
 			isEditorChanged = false;
 			app.updateTitle();
+			settings.save();
 		});
 		app.loadCurTheme();
 
@@ -110,6 +111,12 @@
 	//设置窗口一直居顶
 	app.setAlwaysInFront = function(bFront) {
 		nativeWindow.alwaysInFront = bFront;
+	}
+
+	//切换显示或隐藏
+	app.toggleShow = function(){
+		if (nativeWindow.visible) app.hide();
+		else app.show();
 	}
 
 	//初始化应用菜单
@@ -210,6 +217,10 @@
 		menuItemSeparate = menuIcon.addItem(new air.NativeMenuItem('----', true));
 		menuItemSeparate.name = 'groupBottom';
 
+		var menuItemToggleShow = menuIcon.addItem(new air.NativeMenuItem('显示/隐藏'));
+		menuItemToggleShow.name = 'toggleshow';
+		menuItemToggleShow.addEventListener(air.Event.SELECT, app.menuSelect);
+
 		var menuItemExit = menuIcon.addItem(new air.NativeMenuItem('退出'));
 		menuItemExit.name = 'exit';
 
@@ -217,16 +228,13 @@
 
 		//Windows
 		if (NativeApplication.supportsSystemTrayIcon) {
-			loadResource('icons/icon16.png', function(event) {
+			loadResource(isLinux?'icons/icon_linux.png':'icons/icon16.png', function(event) {
 				NativeApplication.nativeApplication.icon.bitmaps = [event.target.content.bitmapData];
 			});
 			NativeApplication.nativeApplication.icon.tooltip = "hostsPlus";
 			NativeApplication.nativeApplication.icon.menu = menuIcon;
 			//点击系统栏图标切换显示和隐藏
-			air.NativeApplication.nativeApplication.icon.addEventListener(air.MouseEvent.CLICK, function() {
-				if (nativeWindow.visible) app.hide();
-				else app.show();
-			});
+			air.NativeApplication.nativeApplication.icon.addEventListener(air.MouseEvent.CLICK, app.toggleShow);
 		}
 		//Mac
 		if (NativeApplication.supportsDockIcon) {
@@ -281,6 +289,9 @@
 			break;
 		case 'about':
 			app.showAbout();
+			break;
+		case 'toggleshow':
+			app.toggleShow();
 			break;
 		case 'exit':
 			app.exit();
@@ -377,6 +388,7 @@
 
 		for (var i = 0, c = arrToolsList.length; i < c; i++) {
 			tool = arrToolsList[i];
+			if(!isWin && /^(iedns|ffdns)$/.test(tool.cmd))continue;
 			menuItem = menuTools.addItemAt(new air.NativeMenuItem(tool.name), i);
 			menuItem.name = 'tools';
 			menuItem.data = i;
@@ -437,7 +449,7 @@
 
 	//显示DNS设置界面
 	app.showDnsSetup = function() {
-		var $DnsSetup = $('<div class="appdialog dnssetup"><p><label for="bWifi">无线网络：</label> <input id="bWifi" type="checkbox" /></p><p>DNS列表：<br /><br /><textarea id="DnsList"></textarea><br /><span class="tip">示例：美国DNS 8.8.8.8 (中间以空格分隔，多行为多个DNS)</span></p><p class="buttonline"><button id="btnSave">保存修改</button></p></div>');
+		var $DnsSetup = $('<div class="appdialog dnssetup"><p'+(isLinux?' style="display:none;"':'')+'><label for="bWifi">无线网络：</label> <input id="bWifi" type="checkbox" /></p><p>DNS列表：<br /><br /><textarea id="DnsList"></textarea><br /><span class="tip">示例：美国DNS 8.8.8.8 (中间以空格分隔，多行为多个DNS)</span></p><p class="buttonline"><button id="btnSave">保存修改</button></p></div>');
 		var $bWifi = $('#bWifi', $DnsSetup),
 			$DnsList = $('#DnsList', $DnsSetup),
 			$btnSave = $('#btnSave', $DnsSetup);
@@ -714,7 +726,7 @@
 
 	//显示首选项
 	app.showPreference = function(){
-		var $preference = $('<div class="appdialog preference"><p><label for="bStartAtLogin">开机启动：</label> <input id="bStartAtLogin" type="checkbox" /></p><p><label for="bHideAfterStart">启动后隐藏：</label> <input id="bHideAfterStart" type="checkbox" /></p><p class="buttonline"><button id="btnSave">保存修改</button></p></div>');
+		var $preference = $('<div class="appdialog preference"><p'+(isLinux?' style="display:none;"':'')+'><label for="bStartAtLogin">开机启动：</label> <input id="bStartAtLogin" type="checkbox" /></p><p><label for="bHideAfterStart">启动后隐藏：</label> <input id="bHideAfterStart" type="checkbox" /></p><p class="buttonline"><button id="btnSave">保存修改</button></p></div>');
 		var $bStartAtLogin = $('#bStartAtLogin', $preference),
 			$bHideAfterStart = $('#bHideAfterStart', $preference),
 			$btnSave = $('#btnSave', $preference);
@@ -738,6 +750,7 @@
 	//添加新方案
 	app.addHosts = function(){
 		var hostsName = prompt('请输入新方案名字！','');
+		hostsName = hostsName.replace(/\r?\n/g,'');
 		if(hostsName){
 			var hostsList = settings.get('hostsList');
 			hostsList.push({

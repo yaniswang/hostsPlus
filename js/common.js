@@ -6,6 +6,11 @@ var applicationDirectory = air.File.applicationDirectory;
 var applicationStorageDirectory = air.File.applicationStorageDirectory;
 var NativeApplication = air.NativeApplication;
 
+var osname = air.Capabilities.os.toLowerCase();
+var isWin = osname.indexOf("win") > -1,
+	isLinux = osname.indexOf("linux") > -1,
+	isMac = osname.indexOf("mac") > -1;
+
 //加载资源
 function loadResource(path, callback) {
 	var iconLoad = new air.Loader();
@@ -98,9 +103,9 @@ function callExt(api) {
 	if (air.NativeProcess.isSupported) {
 		var file = air.File.applicationDirectory,
 			filepath;
-		var osname = air.Capabilities.os.toLowerCase();
-		if (osname.indexOf("win") > -1) filepath = api + '.cmd';
-		else if (osname.indexOf("mac") > -1) filepath = '';
+		if (isWin) filepath = api + '.cmd';
+		else if (isLinux) filepath = api + '.sh';
+		else if (isMac) filepath = api + '.sh';
 		if (filepath) {
 			file = file.resolvePath('ext/' + filepath);
 			var nativeProcessStartupInfo = new air.NativeProcessStartupInfo();
@@ -134,7 +139,7 @@ function hostname(callback) {
 //ping
 function ping(hostname, callback) {
 	callExt('ping', hostname, function(str) {
-		var match = str.match(/\[((\d+\.){3}\d+)\]/),
+		var match = str.match(/[\[\()]((\d+\.){3}\d+)[\]\)]/),
 			ip = '';
 		if (match !== null) ip = match[1];
 		callback(ip);
@@ -148,7 +153,10 @@ function setSysDns(netname, dnsip) {
 
 //清除系统DNS
 function clearSysDns() {
-	callExt('clearsysdns');
+	if(isWin){
+		//只有Windows清系统DNS
+		callExt('clearsysdns');
+	}
 }
 
 //设置IE DNS缓存模式

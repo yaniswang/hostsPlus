@@ -9,9 +9,14 @@
 (function($,_win,undefined){
 
 	var hosts={};
-	var hostsPath='C:/Windows/System32/drivers/etc/hosts';
+	var hostsPath = '';
+
+	if(isWin)hostsPath = 'C:/Windows/System32/drivers/etc/hosts';
+	else if(isLinux)hostsPath = '/etc/hosts';
+	else if(isMac)hostsPath = '/etc/hosts';
+
 	var charset = isUTF8Bytes(readFile(hostsPath))?'utf-8':'ansi';
-	
+
 	//更新hosts，只在需要转换域名时有效
 	hosts.update=function(){
 		var hostsList=settings.get('hostsList'),curHost=settings.get('curHost');

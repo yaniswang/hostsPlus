@@ -10,6 +10,7 @@ var osname = air.Capabilities.os.toLowerCase();
 var isWin = osname.indexOf("win") > -1,
 	isLinux = osname.indexOf("linux") > -1,
 	isMac = osname.indexOf("mac") > -1;
+var ctrlKey = isMac? 'Cmd' : 'Ctrl';
 
 //加载资源
 function loadResource(path, callback) {
@@ -106,11 +107,17 @@ function callExt(api) {
 		if (isWin) filepath = api + '.cmd';
 		else if (isLinux) filepath = api + '.sh';
 		else if (isMac) filepath = api + '.sh';
+		filepath = 'ext/' + filepath;
 		if (filepath) {
-			file = file.resolvePath('ext/' + filepath);
+			file = file.resolvePath(isMac?'/bin/bash':filepath);
 			var nativeProcessStartupInfo = new air.NativeProcessStartupInfo();
 			nativeProcessStartupInfo.executable = file;
 			var args = new air.Vector["<String>"]();
+			if(isMac){
+				//Mac下无法直接运行sh脚本，必需要通过bash运行
+				var runFile = air.File.applicationDirectory;
+				args.push(runFile.nativePath + '/' + filepath);
+			}
 			var callArguments = arguments,
 				callback = callArguments[callArguments.length - 1],
 				hasCallback = typeof callback === 'function';

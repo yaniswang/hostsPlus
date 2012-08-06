@@ -186,7 +186,9 @@
 		var appMenu = new air.NativeMenu();
 		appMenu.addSubmenu(menuHosts, '方案');
 		appMenu.addSubmenu(menuGroup, '分组');
-		appMenu.addSubmenu(menuDns, 'DNS');
+		if(isWin){
+			appMenu.addSubmenu(menuDns, 'DNS');
+		}
 		appMenu.addSubmenu(menuSettings, '设置');
 		appMenu.addSubmenu(menuTools, '工具');
 		appMenu.addSubmenu(menuHelp, '帮助');
@@ -207,8 +209,10 @@
 
 		var menuItemSep;
 
-		menuItemSeparate = menuIcon.addItem(new air.NativeMenuItem('----', true));
-		menuItemSeparate.name = 'dnsBottom';
+		if(isWin){
+			menuItemSeparate = menuIcon.addItem(new air.NativeMenuItem('----', true));
+			menuItemSeparate.name = 'dnsBottom';
+		}
 
 		var menuItemAllGroupOff = menuIcon.addItem(new air.NativeMenuItem('关闭所有分组'));
 		menuItemAllGroupOff.name = 'setgroupoff';
@@ -242,6 +246,16 @@
 				NativeApplication.nativeApplication.icon.bitmaps = [event.target.content.bitmapData];
 			});
 			NativeApplication.nativeApplication.icon.menu = menuIcon;
+			var bDockInited = false;
+			NativeApplication.nativeApplication.addEventListener(air.InvokeEvent.INVOKE, function(){
+				if(bDockInited){
+					app.toggleShow();
+				}
+				else{
+					bDockInited = true;
+					//屏蔽首次Invoke事件
+				}
+			});
 		}
 	}
 
@@ -311,6 +325,9 @@
 
 	//更新DNS菜单
 	app.updateDnsMenu = function() {
+
+		if(!isWin)return;
+
 		var arrDnsList = settings.get('dnsList'),
 			curDns = settings.get('curDns');
 
@@ -388,7 +405,6 @@
 
 		for (var i = 0, c = arrToolsList.length; i < c; i++) {
 			tool = arrToolsList[i];
-			if(!isWin && /^(iedns|ffdns)$/.test(tool.cmd))continue;
 			menuItem = menuTools.addItemAt(new air.NativeMenuItem(tool.name), i);
 			menuItem.name = 'tools';
 			menuItem.data = i;
@@ -749,18 +765,21 @@
 
 	//添加新方案
 	app.addHosts = function(){
-		var hostsName = prompt('请输入新方案名字！','');
-		hostsName = hostsName.replace(/\r?\n/g,'');
-		if(hostsName){
-			var hostsList = settings.get('hostsList');
-			hostsList.push({
-				name: hostsName,
-				content: ''
-			});
-			settings.set('curHost', hostsList.length-1);
-			app.updateHostMenu();
-			app.loadCurHost();
-		}
+		jDialog.prompt('请输入新方案名字！','',function(e){
+			if(e.type === 'ok'){
+				var hostsName = e.data.replace(/\r?\n/g,'');
+				if(hostsName){
+					var hostsList = settings.get('hostsList');
+					hostsList.push({
+						name: hostsName,
+						content: ''
+					});
+					settings.set('curHost', hostsList.length-1);
+					app.updateHostMenu();
+					app.loadCurHost();
+				}
+			}
+		});
 	}
 
 	//删除当前方案

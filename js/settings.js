@@ -36,8 +36,13 @@
 		//主题列表
 		themeList:['Bespin', 'Dawn'],
 		//工具列表
-		toolsList : [{name:'当前主机名',cmd:'hostname'},{name:'本机IP列表',cmd:'localip'},{name:'关闭IE DNS缓存',cmd:'iedns',enable:false},{name:'关闭FF DNS缓存',cmd:'ffdns'}]
+		toolsList : [{name:'当前主机名',cmd:'hostname'},{name:'本机IP列表',cmd:'localip'}]
 	};
+
+	if(isWin){
+		settings['toolsList'].push({name:'关闭IE DNS缓存',cmd:'iedns',enable:false});
+		settings['toolsList'].push({name:'关闭FF DNS缓存',cmd:'ffdns'});
+	}
 	
 	//从存储器恢复参数
 	settings.load=function(){

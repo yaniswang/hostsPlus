@@ -3,8 +3,8 @@
 	<id>hostsplus</id>
 	<name>hostsPlus</name>
 	<filename>hostsPlus</filename>
-	<versionNumber>0.9.2</versionNumber>
-	<versionLabel>0.9.2</versionLabel>
+	<versionNumber>0.9.3</versionNumber>
+	<versionLabel>0.9.3</versionLabel>
 	<description>
 		<text xml:lang="en">hostsPlus is a editor for hosts.</text>
 		<text xml:lang="zh-cn">hostsPlus是一个hosts增强编辑软件。</text>

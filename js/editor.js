@@ -12,26 +12,27 @@
 	var bWorking = false;
 	var groupId = 1;
 
+
 	//编辑器初始化
+	var keyMaps = {};
+	keyMaps[ctrlKey+'-Q']=function() {
+		editor.toogleSelectionLine(true);
+	}
+	keyMaps[ctrlKey+'-/']=function() {
+		editor.toogleSelectionLine();
+	}
+	keyMaps[ctrlKey+'-G']=function() {
+		editor.addNewGroup();
+	}
+	keyMaps[ctrlKey+'-S']=function() {
+		editor.trigger('save');
+	}
 	editor.init = function() {
 		codeMirror = CodeMirror(document.body, {
 			lineNumbers: true,
 			fixedGutter: true,
 			theme: 'Bespin',
-			extraKeys: {
-				"Ctrl-Q": function() {
-					editor.toogleSelectionLine(true);
-				},
-				"Ctrl-/": function() {
-					editor.toogleSelectionLine();
-				},
-				"Ctrl-G": function() {
-					editor.addNewGroup();
-				},
-				"Ctrl-S": function() {
-					editor.trigger('save');
-				}
-			},
+			extraKeys: keyMaps,
 			onChange: function() {
 				if(!bWorking){
 					editor.trigger('change');

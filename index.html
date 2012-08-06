@@ -33,7 +33,7 @@
 		$win.on('keydown',function(e){
 			switch(e.which){
 				case 9://Tab
-					if(e.ctrlKey){
+					if(isMac?e.metaKey:e.ctrlKey){
 						app.toggleHosts();
 						return false;
 					}

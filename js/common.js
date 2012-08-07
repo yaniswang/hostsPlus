@@ -48,6 +48,17 @@ function isUTF8Bytes(data) {
 	return true;
 }
 
+//校验是否IP(v4&v6)
+function isIp(str){
+	var match = str.match(/:/g), v6Len = match && match.length;
+	if(match && v6Len>0 && v6Len<=7){
+		return /^([\da-f]{0,4}(:|::|$)){1,7}$/i.test(str) && (/::/.test(str)?str.match(/::/g).length === 1:true);
+	}
+	else{
+		return /^(\d{1,3}\.){3}\d{1,3}$/.test(str);
+	}
+}
+
 //读文件
 function readFile(path, bText, charset) {
 	var file = typeof path === 'string' ? applicationStorageDirectory.resolvePath(path) : path;

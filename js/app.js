@@ -225,10 +225,12 @@
 		menuItemToggleShow.name = 'toggleshow';
 		menuItemToggleShow.addEventListener(air.Event.SELECT, app.menuSelect);
 
-		var menuItemExit = menuIcon.addItem(new air.NativeMenuItem('退出'));
-		menuItemExit.name = 'exit';
-
-		menuItemExit.addEventListener(air.Event.SELECT, app.menuSelect);
+		if(!isMac){
+			var menuItemExit = menuIcon.addItem(new air.NativeMenuItem('退出'));
+			menuItemExit.name = 'exit';
+			menuItemExit.addEventListener(air.Event.SELECT, app.menuSelect);
+		}
+		
 
 		//Windows
 		if (NativeApplication.supportsSystemTrayIcon) {

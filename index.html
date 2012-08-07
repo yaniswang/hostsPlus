@@ -24,10 +24,12 @@
 		
 		$(app.init);
 		//关闭按钮
-		nativeWindow.addEventListener(air.Event.CLOSING, function(event){
-			event.preventDefault();
-			app.hide(); 
-		});
+		if(isWin){
+			nativeWindow.addEventListener(air.Event.CLOSING, function(event){
+				event.preventDefault();
+				app.hide(); 
+			});
+		}
 		var $win = $(window);
 		//全局键盘快捷键
 		$win.on('keydown',function(e){

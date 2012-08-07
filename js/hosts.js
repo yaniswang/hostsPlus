@@ -25,7 +25,8 @@
 		var arrPingList=[],domainCount=0,pingCount=0,arrIpList={};
 		arrTextHosts.forEach(function(line){
 			var match;
-			if(match=line.match(/^\s*((?:\d+\.){3}\d+)\s+([^#]+)/)){//IP
+			match = line.match(/^\s*([^\s]+)\s+([^#]+)/);
+			if(match && isIp(match[1])){//IP
 				match[2].trim().split(/\s+/).forEach(function(domain){
 					arrIpList[domain.toLowerCase()]=match[1];
 				});

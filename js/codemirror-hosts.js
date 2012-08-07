@@ -17,7 +17,7 @@ CodeMirror.defineMode("hosts", function() {
 				state.tokenID++;
 				if(match = stream.match(/[^\s#]+/)){
 					if(state.tokenID === 0){
-						return /^(\d{1,3}\.){3}\d{1,3}$/.test(match[0])?'ip':'name';
+						return isIp(match[0])?'ip':'name';
 					}
 					return null;
 				}

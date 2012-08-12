@@ -14,7 +14,7 @@ Features
 5. Theme support.
 
 
- License
+License
 ================
 
 hostsPlus is released under the MIT license:

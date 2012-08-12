@@ -140,6 +140,8 @@ function callExt(api) {
 					process.removeEventListener(air.ProgressEvent.STANDARD_OUTPUT_DATA, progressHandle);
 					var stdOut = process.standardOutput;
 					var str = stdOut.readMultiByte(stdOut.bytesAvailable, 'ansi');
+					process.exit();
+					process = null;
 					callback(str);
 				}
 				process.addEventListener(air.ProgressEvent.STANDARD_OUTPUT_DATA, progressHandle);

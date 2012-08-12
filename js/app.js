@@ -41,20 +41,9 @@
 
 		editor.init();
 		editor.on('change', function(){
-			isEditorChanged = true;
 			app.updateTitle();
 		});
-		editor.on('save', function(e) {
-			var hostsList = settings.get('hostsList'),
-				curHost = settings.get('curHost');
-			var textHosts = editor.get();
-			hostsList[curHost].content = textHosts;
-			hosts.save(textHosts);
-			app.updateGroupMenu();
-			isEditorChanged = false;
-			app.updateTitle();
-			settings.save();
-		});
+		editor.on('save', app.saveEditor);
 		app.loadCurTheme();
 
 		//初始化对话框
@@ -72,6 +61,11 @@
 		if(settings.get('bHideAfterStart')){
 			app.hide();
 		}
+
+		//定时回收垃圾
+		setInterval(function(){
+			air.System.gc();
+		},10000);
 
 	}
 
@@ -115,8 +109,12 @@
 
 	//切换显示或隐藏
 	app.toggleShow = function(){
-		if (nativeWindow.visible) app.hide();
-		else app.show();
+		if (nativeWindow.visible){
+			app.hide();
+		}
+		else{
+			app.show();
+		}
 	}
 
 	//初始化应用菜单
@@ -322,7 +320,7 @@
 	app.updateTitle = function(){
 		var hostsList = settings.get('hostsList'),
 			curHost = settings.get('curHost');
-		document.title = 'hostsPlus - ' + hostsList[curHost].name + (isEditorChanged?' *':'')
+		document.title = 'hostsPlus - ' + hostsList[curHost].name + (editor.bChanged()?' *':'')
 	}
 
 	//更新DNS菜单
@@ -395,7 +393,7 @@
 
 	//更新工具菜单
 	app.updateToolsMenu = function() {
-		var arrToolsList = settings['toolsList'];
+		var arrToolsList = settings.get('toolsList');
 		var tool;
 
 		var arrMenuItem, menuItem;
@@ -417,7 +415,7 @@
 
 	//执行工具
 	app.execTools = function(i) {
-		var arrToolsList = settings['toolsList'],
+		var arrToolsList = settings.get('toolsList'),
 			tool = arrToolsList[i],
 			cmd = tool.cmd;
 		if (tool.enable !== undefined) tool.enable = !tool.enable;
@@ -518,7 +516,7 @@
 	//显示关于界面
 	app.showAbout = function(){
 		var descriptor = '' + NativeApplication.nativeApplication.applicationDescriptor;
-		var match = descriptor.match(/<versionNumber>(.+?)<\/versionNumber>/i); 
+		var match = descriptor.match(/<versionLabel>(.+?)<\/versionLabel>/i); 
 		var ver = '';
 		if(match){
 			ver = match[1];
@@ -538,7 +536,6 @@
 			curHost = settings.get('curHost');
 		var textHosts = hostsList[curHost].content;
 		editor.set(textHosts);
-		isEditorChanged = false;
 		hosts.save(textHosts);
 		app.updateGroupMenu();
 		app.updateTitle();
@@ -643,9 +640,13 @@
 	//设置分组
 	app.setHostsGroup = function(name, bOn, data){
 		
-		if(/\*$/.test(document.title)){
-			alert('请按 Ctrl + S 保存后再切换分组。');
-			return;
+		if(editor.bChanged()){
+			if(confirm('您的编辑结果还没保存,，保存后才能切换分组，需要为您保存吗？')){
+				app.saveEditor();
+			}
+			else{
+				return;
+			}
 		}
 		var hostsList = settings.get('hostsList'),
 			curHost = settings.get('curHost');
@@ -807,6 +808,14 @@
 		var newCurHost = curHost + 1;
 		if(newCurHost>=hostsList.length)newCurHost = 0;
 		if(newCurHost !== curHost){
+			if(editor.bChanged()){
+				if(confirm('您的编辑结果还没保存，需要为您保存吗？')){
+					app.saveEditor();
+				}
+				else{
+					return;
+				}
+			}
 			settings.set('curHost', newCurHost);
 			app.updateHostMenu();
 			app.loadCurHost();
@@ -816,6 +825,18 @@
 	//显示使用指南
 	app.showManual = function(){
 		air.navigateToURL(new air.URLRequest('https://github.com/yaniswang/hostsPlus/wiki/manual'));
+	}
+
+	//保存最新编辑结果
+	app.saveEditor = function(){
+		var hostsList = settings.get('hostsList'),
+			curHost = settings.get('curHost');
+		var textHosts = editor.get();
+		hostsList[curHost].content = textHosts;
+		hosts.save(textHosts);
+		app.updateGroupMenu();
+		app.updateTitle();
+		settings.save();
 	}
 
 	_win.app = app;

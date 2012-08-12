@@ -25,6 +25,7 @@
 		editor.addNewGroup();
 	}
 	keyMaps[ctrlKey+'-S']=function() {
+		codeMirror.clearHistory();
 		editor.trigger('save');
 	}
 	editor.init = function() {
@@ -41,6 +42,13 @@
 		});
 		codeMirror.focus();	
 		$codeMirrorInput = $(codeMirror.getInputField());
+		$codeMirrorInput.on('keydown', function(e){
+			var keyName = String.fromCharCode(e.keyCode);
+			//屏蔽无效控制键
+			if(e.ctrlKey && keyName && /^[^qyasgzcxv/]$/i.test(keyName) && e.which !== 9){
+				return false;
+			}
+		});
 		editor._initGutterSelect();
 	}
 
@@ -108,6 +116,11 @@
 	//返回编辑结果
 	editor.get = function() {
 		if(codeMirror)return codeMirror.getValue();
+	}
+
+	//是否可撤销
+	editor.bChanged = function(){
+		return codeMirror.historySize().undo>0;
 	}
 
 	//设置主题

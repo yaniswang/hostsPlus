@@ -6,7 +6,7 @@
 	<versionNumber>0.9.3</versionNumber>
 	<versionLabel>0.9.3 (build 20120811)</versionLabel>
 	<description>
-		<text xml:lang="en">hostsPlus is a editor for hosts.</text>
+		<text xml:lang="en">hostsPlus is a editor for hosts file.</text>
 		<text xml:lang="zh-cn">hostsPlus是一个hosts增强编辑软件。</text>
 	</description>
 	<supportedProfiles>extendedDesktop desktop</supportedProfiles>

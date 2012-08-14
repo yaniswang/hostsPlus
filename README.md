@@ -1,11 +1,11 @@
 hostsPlus
-=========
+================
 
-hostsPlus is a editor for hosts file.
+hostsPlus is a editor for manage hosts file.
 
 
 Features
-========
+================
 
 1. Multi Hosts file Manage.
 2. Multi Group in single hosts file.
@@ -38,3 +38,9 @@ hostsPlus is released under the MIT license:
 > LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 > OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 > THE SOFTWARE.
+
+Thanks
+================
+
+* GitHub: [https://github.com/](https://github.com/)
+* CodeMirror: [http://codemirror.net/](http://codemirror.net/)

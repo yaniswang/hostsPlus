@@ -320,7 +320,7 @@
 	app.updateTitle = function(){
 		var hostsList = settings.get('hostsList'),
 			curHost = settings.get('curHost');
-		document.title = 'hostsPlus - ' + hostsList[curHost].name + (editor.bChanged()?' *':'')
+		document.title = (editor.bChanged()?' *':'') + hostsList[curHost].name + ' - hostsPlus';
 	}
 
 	//更新DNS菜单

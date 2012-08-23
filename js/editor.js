@@ -181,17 +181,14 @@
 
 	//新建分组
 	editor.addNewGroup = function(){
-		var fromLine = codeMirror.getCursor(true).line, strLine, strPrevLine;
+		var fromLine = codeMirror.getCursor(true).line, strLine;
 		var regGroup = /^\s*#\s*=+[^=]+=+/;
 		strLine = codeMirror.getLine(fromLine);
-		if(fromLine>0){
-			strPrevLine = codeMirror.getLine(fromLine-1);
-		}
-		if(fromLine === 0 || !(regGroup.test(strLine) || regGroup.test(strPrevLine))){
-			var strGroupId = 'group ' + groupId++;
-			codeMirror.setLine(fromLine, '\r\n# ==================== ' + strGroupId + ' ====================\r\n' + strLine);
-			codeMirror.setSelection({line:fromLine+1, ch:23}, {line:fromLine+1, ch:23 + strGroupId.length});
-		}
+
+		var strGroupId = 'group ' + groupId++;
+		codeMirror.setLine(fromLine, '\r\n# ==================== ' + strGroupId + ' ====================\r\n\r\n' + strLine);
+		codeMirror.setSelection({line:fromLine+1, ch:23}, {line:fromLine+1, ch:23 + strGroupId.length});
+		
 	}
 
 	_win.editor = editor;

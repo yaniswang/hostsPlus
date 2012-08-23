@@ -22,7 +22,7 @@
 		var hostsList=settings.get('hostsList'),curHost=settings.get('curHost');
 		if(curHost===-1)return;
 		var textHosts=hostsList[curHost].content,arrTextHosts=textHosts.split(/\r?\n/g);
-		var arrPingList=[],domainCount=0,pingCount=0,arrIpList={};
+		var arrPingList={},domainCount=0,pingCount=0,arrIpList={};
 		arrTextHosts.forEach(function(line){
 			var match;
 			match = line.match(/^\s*([^\s]+)\s+([^#]+)/);
@@ -34,13 +34,14 @@
 			else if(/^\s*#/.test(line)===false){//cname转向
 				match=line.match(/^\s*([^\s]+)\s+.+/);
 				if(match!==null){
-					arrPingList.push(match[1].toLowerCase());
+					arrPingList[match[1].toLowerCase()] = true;
+					//arrPingList.push(match[1].toLowerCase());
 				}				
 			}
 		});
-		domainCount=arrPingList.length;
+		domainCount=Object.keys(arrPingList).length;
 		if(domainCount>0){
-			arrPingList.forEach(function(domain){
+			for(domain in arrPingList){
 				if(!arrIpList[domain]){
 					ping(domain,function(ip){
 						arrIpList[domain]=ip;
@@ -58,7 +59,7 @@
 						replaceDomain2Ip();
 					}
 				}
-			});
+			};
 		}
 		function replaceDomain2Ip(){
 			arrTextHosts.forEach(function(line,i){

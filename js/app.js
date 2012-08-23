@@ -760,6 +760,7 @@
 			bStartAtLogin = $bStartAtLogin.attr('checked') ? true : false;
 			settings.set('bStartAtLogin', bStartAtLogin);
 			settings.set('bHideAfterStart', $bHideAfterStart.attr('checked') ? true : false);
+			settings.save();
 			app.setStartAtLogin(bStartAtLogin);
 			alert('修改成功');
 			dialog.hide();

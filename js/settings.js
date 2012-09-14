@@ -10,7 +10,7 @@
 
 	//参数存储文件名
 	var sSettingFileName='settings.json';
-	
+
 	//默认设置
 	var defaultSettings={
 		//是否开机自动启动
@@ -32,7 +32,7 @@
 		curTheme:0,
 		//工具列表
 		toolsList : [{name:'当前主机名',cmd:'hostname'},{name:'本机IP列表',cmd:'localip'}]
-	};	
+	};
 
 	var settings={
 		//主题列表
@@ -43,7 +43,7 @@
 		defaultSettings['toolsList'].push({name:'关闭IE DNS缓存',cmd:'iedns',enable:false});
 		defaultSettings['toolsList'].push({name:'关闭FF DNS缓存',cmd:'ffdns'});
 	}
-	
+
 	//从存储器恢复参数
 	settings.load=function(){
 		var _this=this;
@@ -60,14 +60,14 @@
 		_this.json=json;
 		return _this;
 	}
-	
+
 	//保存参数到存储器
 	settings.save=function(){
 		var _this=this;
 		writeFile(sSettingFileName,JSON.stringify(_this.json));
 		return _this;
 	}
-	
+
 	//读取参数
 	settings.get=function(key,bClone){
 		var returnValue=this.json[key];
@@ -77,17 +77,18 @@
 		}
 		return returnValue;
 	}
-	
+
 	//存入参数
 	settings.set=function(key,value){
 		var _this=this;
 		_this.json[key]=value;
+		_this.save();
 		return _this;
 	}
-	
+
 	//加载参数设置
 	settings.load();
-	
+
 	_win.settings=settings;
-	
+
 })(window);

@@ -40,7 +40,7 @@
 				}
 			}
 		});
-		codeMirror.focus();	
+		codeMirror.focus();
 		$codeMirrorInput = $(codeMirror.getInputField());
 		$codeMirrorInput.on('keydown', function(e){
 			var keyName = String.fromCharCode(e.keyCode);
@@ -188,7 +188,6 @@
 		var strGroupId = 'group ' + groupId++;
 		codeMirror.setLine(fromLine, '\r\n# ==================== ' + strGroupId + ' ====================\r\n\r\n' + strLine);
 		codeMirror.setSelection({line:fromLine+1, ch:23}, {line:fromLine+1, ch:23 + strGroupId.length});
-		
 	}
 
 	_win.editor = editor;

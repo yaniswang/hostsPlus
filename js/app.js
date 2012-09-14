@@ -57,7 +57,7 @@
 
 		app.loadCurHost();
 
-		app.toggleFullscreen();	
+		app.toggleFullscreen();
 		if(settings.get('bHideAfterStart')){
 			app.hide();
 		}
@@ -138,7 +138,7 @@
 		var menuItemExit = menuHosts.addItem(new air.NativeMenuItem('退出'));
 		menuItemExit.name = 'exit';
 		menuItemExit.addEventListener(air.Event.SELECT, app.menuSelect);
-		
+
 
 		//切换分组
 		menuGroup = new air.NativeMenu();
@@ -168,7 +168,7 @@
 		menuSettingsPreference.addEventListener(air.Event.SELECT, app.menuSelect);
 
 		menuSettingsTheme = new air.NativeMenu();
-		menuSettings.addSubmenu(menuSettingsTheme, '主题');		
+		menuSettings.addSubmenu(menuSettingsTheme, '主题');
 
 		//帮助主菜单
 		var menuHelp = new air.NativeMenu();
@@ -228,7 +228,7 @@
 			menuItemExit.name = 'exit';
 			menuItemExit.addEventListener(air.Event.SELECT, app.menuSelect);
 		}
-		
+
 
 		//Windows
 		if (NativeApplication.supportsSystemTrayIcon) {
@@ -516,7 +516,7 @@
 	//显示关于界面
 	app.showAbout = function(){
 		var descriptor = '' + NativeApplication.nativeApplication.applicationDescriptor;
-		var match = descriptor.match(/<versionLabel>(.+?)<\/versionLabel>/i); 
+		var match = descriptor.match(/<versionLabel>(.+?)<\/versionLabel>/i);
 		var ver = '';
 		if(match){
 			ver = match[1];
@@ -639,7 +639,7 @@
 
 	//设置分组
 	app.setHostsGroup = function(name, bOn, data){
-		
+
 		if(editor.bChanged()){
 			if(confirm('您的编辑结果还没保存,，保存后才能切换分组，需要为您保存吗？')){
 				app.saveEditor();
@@ -705,6 +705,7 @@
 		textHost = arrTextHosts.join('\r\n');
 
 		hostsList[curHost].content = textHost;
+		settings.save();
 
 		app.loadCurHost();
 
@@ -722,7 +723,7 @@
 		var menuItemTheme;
 
 		menuSettingsTheme.removeAllItems();
-		
+
 		var themeList = settings['themeList']
 			curTheme = settings.get('curTheme');
 

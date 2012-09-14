@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -21,13 +21,13 @@
 	<script type="text/javascript">
 		jDialog.settings.skin = 'easyui';
 		jDialog.settings.animate = false;
-		
+
 		$(app.init);
 		//关闭按钮
 		if(isWin){
 			nativeWindow.addEventListener(air.Event.CLOSING, function(event){
 				event.preventDefault();
-				app.hide(); 
+				app.hide();
 			});
 		}
 		var $win = $(window);
@@ -52,9 +52,9 @@
 					return false;
 					break;
 			}
-		});		
+		});
 
 	</script>
-</head> 
-<body></body> 
+</head>
+<body></body>
 </html>

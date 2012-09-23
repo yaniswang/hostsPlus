@@ -2,9 +2,7 @@
  * hostsPlus
  *
  * @author Yanis.Wang<yanis.wang@gmail.com>
- * @site http://alibaba.com
  *
- * @Version: 1.0.0 (build 120408)
  */
 (function($, _win, undefined) {
 	var editor = $({});

@@ -1,28 +1,25 @@
 ﻿/*!
  * jDialog
  *
- * @onwer http://dict.cn/
- * @developer Yanis Wang
+ * @author Yanis.Wang<yanis.wang@gmail.com>
  *
- * @Version: 1.0.0
- * @Build 20111214
  */
 (function($,_win,_doc,undefined){
 
 	var defaults={title:'提示',type:'text',skin:'default',position:{'left':'center','top':'center'},focus:'mousedown',shadow:4,time:0,noTitle:false,noBorder:false,fixed:false,drag:false,modal:false,animate:300};//默认设置
-	
+
 	var jDialog=function(){
 		var _this=this;
 		_this.init.apply(_this,arguments);
-	};	
+	};
 	jDialog.version='1.0.0';
 	jDialog.settings=defaults;
-	
+
 	//读JS当前路径
 	var jsRoot=$('script:last')[0].src.replace(/[^\/]+$/,'');
 	if(!jsRoot.match(/^https?/i))jsRoot=location+jsRoot;
-	
-	
+
+
 	//初始化jDialog
 	var isIE=$.browser.msie,browVer=$.browser.version,isIE6=isIE&&browVer<7,isTouch=('ontouchend' in _doc);;
 	var $win=$(_win),_docElem,_body;
@@ -40,7 +37,7 @@
 		arrModalDailog.pop();
 		modalCount--;
 		modalCount==0?$modalMask.hide():$modalMask.css('zIndex',arrModalDailog[arrModalDailog.length-1].zIndex);
-	}	
+	}
 	$(function(){
 		_docElem=_doc.documentElement;
 		_body=_doc.body;
@@ -61,7 +58,7 @@
 			}
 		});
 	});
-	
+
 	jDialog.prototype={
 		//初始化对话框
 		init:function(options,callback){
@@ -135,7 +132,7 @@
 						}
 						left=left<limitLeft?limitLeft:(left>limitRight?limitRight:left);
 						top=top<limitTop?limitTop:(top>limitBottom?limitBottom:top);
-						
+
 						if(!isIE6||!corner){
 							$dialog.css('opacity',0.5);
 							$shadow.hide();
@@ -200,7 +197,7 @@
 						catch(e){
 							bResult=false;
 						}
-						if(bResult)return iframeCallback(result);	
+						if(bResult)return iframeCallback(result);
 					}
 				})
 				//初始化iframe接口
@@ -249,7 +246,7 @@
 				if(newWidth){
 					$dialog.css('width',newWidth);
 					$content.css({'width':newWidth});
-				}				
+				}
 			}
 			var dialogHeight=$dialog.height(),newHeight;
 			if(height){
@@ -289,7 +286,7 @@
 				var time=settings.time;
 				if(time>0)setTimeout(function(){_this.hide();},time);
 				if(settings.afterShow)settings.afterShow.call(_this);
-			}			
+			}
 			return _this;
 		},
 		//隐藏对话框
@@ -385,7 +382,7 @@
 		}
 	};
 	_win.jDialog=jDialog;
-	
+
 	//---------------------------alert,confirm,prompt模块---------------------------
 	var sOk='<button class="dd_ok">确定</button>',sCancel='<button class="dd_cancel">取消</button>';
 	var alertFunc=jDialog.alert=function(sHtml,callback){
@@ -435,8 +432,8 @@
 		return new jDialog($.extend({},jDialog.messageSettings,{content:sHtml,beforeHide:function(){return hideCallback();},afterHide:function(){this.remove();}})).show();
 	}
 	jDialog.messageSettings={type:'html',modal:true,drag:true,fixed:true,animate:false,width:[0,300]};
-	
-	
+
+
 	//---------------------------popup模块---------------------------
 	var popupFunc=jDialog.popup=function(sHtml,popupOptions,dialogOptions){
 		if(!popupOptions)popupOptions={};
@@ -526,7 +523,7 @@
 		return $dialog;
 	};
 	jDialog.popupSettings={noTitle:true,noClose:true};
-	
+
 	//---------------------------jquery插件---------------------------
 	$.fn.jDialog=function(options){//dDailog插件
 		var arrDialog=[],arrDiv;
@@ -548,9 +545,9 @@
 		var delay=settings.delay,maxWidth=settings.maxWidth,skin=settings.skin;
 		if(maxWidth)dialogOptions.width=[0,maxWidth];
 		if(skin)dialogOptions.skin=skin;
-		
+
 		var dialog=new jDialog(dialogOptions);
-		
+
 		var bTitleClose,bShow,lastOffset,_timer;
 		_this.bind({mouseover:function(){
 			hideTip();
@@ -585,5 +582,5 @@
 		}
 		return _this;
 	};
-	
+
 })(jQuery,window,document);

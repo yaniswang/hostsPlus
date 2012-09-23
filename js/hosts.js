@@ -2,9 +2,7 @@
  * hostsPlus
  *
  * @author Yanis.Wang<yanis.wang@gmail.com>
- * @site http://alibaba.com
  *
- * @Version: 1.0.0 (build 120408)
  */
 (function($,_win,undefined){
 
@@ -36,7 +34,7 @@
 				if(match!==null){
 					arrPingList[match[1].toLowerCase()] = true;
 					//arrPingList.push(match[1].toLowerCase());
-				}				
+				}
 			}
 		});
 		domainCount=Object.keys(arrPingList).length;
@@ -86,9 +84,9 @@
 	hosts.load=function(){
 		return readFile(hostsPath, true, charset);
 	}
-	
+
 	setInterval(hosts.update,settings.get('updateInterval')*1000);
 	setTimeout(hosts.update,100);
-	
-	_win.hosts=hosts;	
+
+	_win.hosts=hosts;
 })(jQuery,window);

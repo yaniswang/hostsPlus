@@ -2,9 +2,7 @@
  * hostsPlus
  *
  * @author Yanis.Wang<yanis.wang@gmail.com>
- * @site http://htmldriver.com/
  *
- * @Version: 1.0.0 (build 111018)
  */
 (function(_win,undefined){
 

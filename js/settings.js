@@ -20,10 +20,12 @@
 		curHost:-1,
 		//定时刷新hosts间隔，单位：秒
 		updateInterval:5,
+		//定时刷新远程hosts间隔
+		remoteUpdateInterval:5,
 		//是否为WIFI连接
 		bWifi:false,
 		//DNS列表
-		dnsList:[{name:'广州DNS',ip:'202.96.128.143'},{name:'美国DNS',ip:'8.8.8.8'}],
+		dnsList:[{name:'美国DNS',ip:'8.8.8.8'}],
 		//当前选择的DNS
 		curDns:-1,
 		//当前选择的主题

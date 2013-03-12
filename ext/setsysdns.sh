@@ -1,5 +1,5 @@
 if [ "$2" = "clear" ];then
-	echo "nameserver 127.0.0.1" > /etc/resolv.conf
+    networksetup -setdnsservers $1 empty
 else
-	echo "nameserver $2" > /etc/resolv.conf
+    networksetup -setdnsservers $1 $2
 fi

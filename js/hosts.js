@@ -73,14 +73,17 @@
 			hosts.save(arrTextHosts.join('\r\n'));
 		}
 	}
+
 	//保存内容到hosts文件
 	hosts.save=function(content){
 		var sysHosts=hosts.load();
-		if(content!=sysHosts){
+		if(content!==sysHosts){//与系统hosts有差异才保存
 			writeFile(hostsPath, content, charset);
 			clearSysDns();
 		}
 	}
+
+	//读取系统hosts文件
 	hosts.load=function(){
 		return readFile(hostsPath, true, charset);
 	}

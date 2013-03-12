@@ -31,14 +31,14 @@
 			lineNumbers: true,
 			fixedGutter: true,
 			theme: 'Bespin',
-			extraKeys: keyMaps,
-			onChange: function() {
+			extraKeys: keyMaps
+		});
+		codeMirror.focus();
+		codeMirror.on('change', function(){
 				if(!bWorking){
 					editor.trigger('change');
 				}
-			}
-		});
-		codeMirror.focus();
+			});
 		$codeMirrorInput = $(codeMirror.getInputField());
 		$codeMirrorInput.on('keydown', function(e){
 			var keyName = String.fromCharCode(e.keyCode);
@@ -47,58 +47,6 @@
 				return false;
 			}
 		});
-		editor._initGutterSelect();
-	}
-
-	//初始化多行全选
-	editor._initGutterSelect = function() {
-		var bGutterSelect = false,
-			lastSelect = null;
-		var startLine = -1, oldStartLine;
-		var $gutter = $(codeMirror.getGutterElement());
-		$gutter.on('mousedown', function(e) {
-			var curTarget = e.target;
-			if (curTarget.tagName === 'PRE') {
-				bGutterSelect = true;
-				$gutter.css('cursor', 'text');
-				startLine = $(curTarget).index();
-				if(!e.shiftKey){
-					oldStartLine = startLine;
-				}
-				selectLine(e.shiftKey?oldStartLine:startLine, startLine);
-			}
-		}).on('mousemove', function(e) {
-			var curTarget = e.target;
-			if (bGutterSelect && curTarget.tagName === 'PRE' && curTarget !== lastSelect) {
-				lastSelect = curTarget;
-				selectLine(startLine, $(curTarget).index());
-			}
-		});
-		$(document).on('mouseup', function() {
-			if (bGutterSelect) {
-				bGutterSelect = false;
-				$gutter.css('cursor', 'default');
-			}
-		});
-
-		function selectLine(startLine, endLine) {
-			if (startLine > endLine) {
-				var temp = startLine;
-				startLine = endLine;
-				endLine = temp;
-			}
-			var endLineLen = codeMirror.getLine(endLine).length;
-			//保存滚动现场
-			var scrollInfo = codeMirror.getScrollInfo();
-			codeMirror.setSelection({
-				line: startLine,
-				ch: 0
-			}, {
-				line: endLine,
-				ch: endLineLen
-			});
-			codeMirror.scrollTo(scrollInfo.x, scrollInfo.y);
-		}
 	}
 
 	//设置编辑器值
@@ -174,10 +122,28 @@
 	editor.gotoLine = function(line){
 		codeMirror.setCursor({line:line,ch:0});
 		var pos = codeMirror.charCoords({line:line,ch:0}, 'local');
-		codeMirror.scrollTo(pos.x, pos.y);
+		codeMirror.scrollTo(pos.left, pos.top);
 	}
 
-	//新建分组
+	//获取屏幕和光标
+	editor.getBookmark = function(){
+		var scrollInfo = codeMirror.getScrollInfo(),
+			cursorInfo = codeMirror.getCursor();
+		return {
+			x: scrollInfo.left,
+			y: scrollInfo.top,
+			line:cursorInfo.line,
+			ch:cursorInfo.ch
+		};
+	}
+
+	//还原屏幕和光标
+	editor.setBookmark = function(bookmark){
+		codeMirror.scrollTo(bookmark.x, bookmark.y);
+		codeMirror.setCursor({line:bookmark.line,ch:bookmark.ch});
+	}
+
+	//在当前位置新建分组
 	editor.addNewGroup = function(){
 		var fromLine = codeMirror.getCursor(true).line, strLine;
 		var regGroup = /^\s*#\s*=+[^=]+=+/;

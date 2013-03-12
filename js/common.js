@@ -132,7 +132,11 @@ function callExt(api) {
 			var callArguments = arguments,
 				callback = callArguments[callArguments.length - 1],
 				hasCallback = typeof callback === 'function';
-			for (var i = 1, c = callArguments.length - (hasCallback ? 1 : 0); i < c; i++) args.push(callArguments[i]);
+			for (var i = 1, c = callArguments.length - (hasCallback ? 1 : 0); i < c; i++){
+				if(callArguments[i] !== null && callArguments[i] !== undefined){
+					args.push(callArguments[i]);
+				}
+			}
 			nativeProcessStartupInfo.arguments = args;
 			var process = new air.NativeProcess();
 			if (hasCallback) {
@@ -182,4 +186,101 @@ function clearSysDns() {
 //设置IE DNS缓存模式
 function setIeDns(disable) {
 	callExt('setiedns', disable);
+}
+
+//抓取URL
+function getUrl(url, requestHeaders, callback){
+	var request = new air.URLRequest(url); 
+	var loader = new air.URLLoader(); 
+	if(callback === undefined){
+		callback = requestHeaders;
+		requestHeaders = null;
+	}
+	if(requestHeaders !== null){
+		for(var name in requestHeaders){
+			request.requestHeaders.push(new air.URLRequestHeader(name, requestHeaders[name]));
+		}
+	}
+	var responseStatus;
+		mapResponseHeaders = {};
+	loader.addEventListener(air.HTTPStatusEvent.HTTP_RESPONSE_STATUS, function(e){
+		responseStatus = e.status;
+		var mapHeaders = {};
+		var responseHeaders = e.responseHeaders;
+		for(var i=0,l=responseHeaders.length;i<l;i++){
+			mapResponseHeaders[responseHeaders[i].name] = responseHeaders[i].value;
+		}
+	});
+	loader.addEventListener(air.Event.COMPLETE, function(e){
+		if(callback){
+			if(responseStatus === 200){
+				callback(true, mapResponseHeaders, e.target.data);
+			}
+			else{
+				callback(false);
+			}
+		}
+	});
+	loader.addEventListener(air.IOErrorEvent.IO_ERROR, function(e){
+		if(callback){
+			callback(false, e);
+		}
+	});
+	loader.load(request);
+}
+
+function nslookup(hostname, dnsserver, callback){
+	callExt('nslookup', hostname, dnsserver?dnsserver:null, function(str) {
+		var match = str.match(/(?:名称|Name):\s*[^\r\n]+\r?\nAddress(?:es)?:\s*((\d+\.){3}\d+)/i);
+		if(match !== null){
+			callback(true, match[1]);
+		}
+		else{
+			callback(false);
+		}
+	});
+}
+
+Object.keys = Object.keys || function(obj){
+   var keys = [];
+   for(var key in obj){
+   		if (obj.hasOwnProperty(key))
+   		{
+   			keys.push(key);
+   		}
+   }
+   return keys;
+}
+
+//以指定DNS请求URL
+function getUrlWithDns(url, dnsserver, callback){
+	var match = url.match(/^https?:\/\/([^\/]+)/);
+	if(match){
+		var host = match[1];
+		nslookup(host, dnsserver, function(bSuccess, ip){
+			if(bSuccess === true){
+				getUrl(url.replace(/^(https?:\/\/)[^\/]+/,'$1'+ip), {'Host': host}, function(bSuccess, headers, data){
+					callback(bSuccess, ip, headers, data)
+				});
+			}
+			else{
+				callback(false);
+			}
+		});
+	}
+}
+
+//以指定DNS请求多个URL
+function getUrlsWithDns(arrUrls, dnsserver, callback){
+	var allResult = {};
+	var allCount = arrUrls.length, getCount = 0;
+	arrUrls.forEach(function(url){
+		getUrlWithDns(url, dnsserver, function(bSuccess, ip, headers, data){
+			allResult[url] = bSuccess?data:false;
+			getCount ++;
+			if(getCount === allCount){
+				callback(allResult);
+			}
+		});
+	});
 }

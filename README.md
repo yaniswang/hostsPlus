@@ -1,20 +1,27 @@
 hostsPlus
 ================
 
-hostsPlus is a editor for manage hosts file.
+hostsPlus是一款强大的hosts增强管理软件，可以方便高效的管理您的hosts绑定，是您开发的得力助手。
 
 
-Features
+功能
 ================
 
-1. Multi Hosts file Manage.
-2. Multi Group in single hosts file.
-3. Redirect domain to host name or another domain.
-4. Switch DNS.
-5. Theme support.
+1. 多文件Hosts方案管理
+2. 单Hosts文件中分组管理
+3. 绑定到机器名或域名
+4. 远程Hosts
+5. 切换DNS
+6. CDN一致性检测
+7. 主题支持
+8. 跨平台兼容：Windows,Linux,Mac
 
+文档
+================
 
-License
+1. 使用手册： [https://github.com/yaniswang/hostsPlus/wiki/manual](https://github.com/yaniswang/hostsPlus/wiki/manual)
+
+协议
 ================
 
 hostsPlus is released under the MIT license:
@@ -41,7 +48,7 @@ hostsPlus is released under the MIT license:
 > OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 > THE SOFTWARE.
 
-Thanks
+感谢
 ================
 
 * GitHub: [https://github.com/](https://github.com/)

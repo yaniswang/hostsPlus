@@ -16,7 +16,6 @@
 
 	//软件初始化
 	app.init = function() {
-
 		var hostsList = settings.get('hostsList'),
 			curHost = settings.get('curHost');
 		//首次打开软件，读取系统默认hosts文件
@@ -59,6 +58,10 @@
 		if(settings.get('bHideAfterStart')){
 			app.hide();
 		}
+
+		//开始自动更新远程hosts
+		setInterval(app.updateRemoteHosts, settings.get('remoteUpdateInterval')*1000);
+		setTimeout(app.updateRemoteHosts, 100);
 
 		//定时回收垃圾
 		setInterval(function(){
@@ -150,10 +153,18 @@
 		//切换DNS
 		menuDns = new air.NativeMenu();
 
-		menuDns.addItem(new air.NativeMenuItem('----', true));
+		if(!isLinux){
+			menuDns.addItem(new air.NativeMenuItem('----', true));
+		}
 		var menuItemDnsSetup = menuDns.addItem(new air.NativeMenuItem('设置DNS'));
 		menuItemDnsSetup.name = 'dnssetup';
 		menuItemDnsSetup.addEventListener(air.Event.SELECT, app.menuSelect);
+
+		menuDns.addItem(new air.NativeMenuItem('----', true));
+
+		var menuItemDnsCdn = menuDns.addItem(new air.NativeMenuItem('CDN检测'));
+		menuItemDnsCdn.name = 'dnscdn';
+		menuItemDnsCdn.addEventListener(air.Event.SELECT, app.menuSelect);
 
 		//工具菜单
 		menuTools = new air.NativeMenu();
@@ -165,8 +176,24 @@
 		menuSettingsPreference.name = 'preference';
 		menuSettingsPreference.addEventListener(air.Event.SELECT, app.menuSelect);
 
+		var menuRemoteHostsSetup = menuSettings.addItem(new air.NativeMenuItem('远程Hosts'));
+		menuRemoteHostsSetup.name = 'remotehostssetup';
+		menuRemoteHostsSetup.addEventListener(air.Event.SELECT, app.menuSelect);
+
 		menuSettingsTheme = new air.NativeMenu();
 		menuSettings.addSubmenu(menuSettingsTheme, '主题');
+
+		menuSettings.addItem(new air.NativeMenuItem('----', true));
+
+		//备份菜单
+		var menuSettingsBackup = menuSettings.addItem(new air.NativeMenuItem('备份数据'));
+		menuSettingsBackup.name = 'backup';
+		menuSettingsBackup.addEventListener(air.Event.SELECT, app.menuSelect);
+
+		//恢复备份菜单
+		var menuSettingsRestore = menuSettings.addItem(new air.NativeMenuItem('恢复备份'));
+		menuSettingsRestore.name = 'restore';
+		menuSettingsRestore.addEventListener(air.Event.SELECT, app.menuSelect);
 
 		//帮助主菜单
 		var menuHelp = new air.NativeMenu();
@@ -182,9 +209,7 @@
 		var appMenu = new air.NativeMenu();
 		appMenu.addSubmenu(menuHosts, '方案');
 		appMenu.addSubmenu(menuGroup, '分组');
-		if(isWin){
-			appMenu.addSubmenu(menuDns, 'DNS');
-		}
+		appMenu.addSubmenu(menuDns, 'DNS');
 		appMenu.addSubmenu(menuSettings, '设置');
 		appMenu.addSubmenu(menuTools, '工具');
 		appMenu.addSubmenu(menuHelp, '帮助');
@@ -205,7 +230,7 @@
 
 		var menuItemSep;
 
-		if(isWin){
+		if(!isLinux){
 			menuItemSeparate = menuIcon.addItem(new air.NativeMenuItem('----', true));
 			menuItemSeparate.name = 'dnsBottom';
 		}
@@ -278,6 +303,9 @@
 		case 'setgroupoff':
 			app.setHostsGroup('',false);
 			break;
+		case 'remotehostssetup':
+			app.showRemoteHosts();
+			break;
 		case 'setdns':
 			settings.set('curDns', target.data);
 			app.setSysDns();
@@ -286,12 +314,21 @@
 		case 'dnssetup':
 			app.showDnsSetup();
 			break;
+		case 'dnscdn':
+			app.showDnsCDNTest();
+			break;
 		case 'preference':
 			app.showPreference();
 			break;
 		case 'settheme':
 			settings.set('curTheme', target.data);
 			app.loadCurTheme();
+			break;
+		case 'backup':
+			app.backup();
+			break;
+		case 'restore':
+			app.restore();
 			break;
 		case 'tools':
 			app.execTools(target.data);
@@ -324,7 +361,7 @@
 	//更新DNS菜单
 	app.updateDnsMenu = function() {
 
-		if(!isWin)return;
+		if(isLinux)return;
 
 		var arrDnsList = settings.get('dnsList'),
 			curDns = settings.get('curDns');
@@ -386,7 +423,16 @@
 		var bWifi = settings.get('bWifi'),
 			arrDnsList = settings.get('dnsList'),
 			curDns = settings.get('curDns');
-		setSysDns(bWifi ? '无线网络连接' : '本地连接', curDns != -1 ? arrDnsList[curDns].ip : '');
+		var netname;
+		if(isWin){
+			netname = bWifi ? '无线网络连接' : '本地连接'
+		}
+		else if(isMac){
+			netname = bWifi ? 'Wi-Fi' : 'Ethernet'
+		}
+		if(netname){
+			setSysDns(netname, curDns != -1 ? arrDnsList[curDns].ip : '');
+		}
 	}
 
 	//更新工具菜单
@@ -766,6 +812,49 @@
 		});
 	}
 
+	//显示远程hosts
+	app.showRemoteHosts = function(){
+		var jRemoteHosts = $('<div class="appdialog preference"><p><label for="remoteHostsUrl">远程Hosts地址：</label><input id="remoteHostsUrl" type="text" style="width:300px;"></p><p class="tip">自动刷新启用条件：1. 当前为默认Hosts方案, 2. 当前Hosts为保存状态</p><p class="buttonline"><button id="btnSave">保存修改并更新</button></p></div>');
+		var jRemoteHostsUrl = $('#remoteHostsUrl', jRemoteHosts),
+			jBtnSave = $('#btnSave', jRemoteHosts);
+		dialog.setTitle('设置远程Hosts').setContent(jRemoteHosts).moveTo().show();
+
+		var remoteHostsUrl = settings.get('remoteHostsUrl');
+		jRemoteHostsUrl.val(remoteHostsUrl).focus();
+
+		jBtnSave.click(function(){
+			jBtnSave.attr('disabled', true);
+			remoteHostsUrl = jRemoteHostsUrl.val();
+			if(remoteHostsUrl){
+				if(/^https?:\/\//.test(remoteHostsUrl)){
+					getUrl(remoteHostsUrl, function(bSuccess, headers, text){
+						if(bSuccess === true){
+							settings.set('remoteHostsUrl', remoteHostsUrl);
+							app.updateRemoteHosts(true);
+							dialog.hide();
+							alert('修改成功');
+						}
+						else{
+							alert('输入的URL请求失败，请检查并重新输入。');
+							jBtnSave.attr('disabled', false);
+						}
+					})
+				}
+				else{
+					jRemoteHostsUrl.focus();
+					alert('请输入http://或https://开始的URL地址');
+					jBtnSave.attr('disabled', false);
+				}
+			}
+			else{
+				settings.set('remoteHostsUrl', remoteHostsUrl);
+				updateRemoteHosts('');
+				dialog.hide();
+				alert('修改成功');
+			}
+		});
+	}
+
 	//添加新方案
 	app.addHosts = function(){
 		jDialog.prompt('请输入新方案名字！','',function(e){
@@ -837,6 +926,256 @@
 		app.updateGroupMenu();
 		app.updateTitle();
 		settings.save();
+	}
+
+	//备份数据
+	app.backup = function(){
+		var file = new air.File();
+		file.browseForSave("请选择要备份的文件");
+		file.addEventListener(air.Event.SELECT, function(event){
+			var bakFile = event.target ;
+			var fileStream = new air.FileStream();
+			fileStream.open(bakFile, air.FileMode.WRITE);
+			fileStream.writeUTFBytes(JSON.stringify(settings.json));
+			fileStream.close();
+			alert('备份成功');
+		});
+	}
+
+	//恢复备份
+	app.restore = function(){
+		var file = new air.File();
+		file.browseForOpen("请选择要恢复的备份文件");
+		file.addEventListener(air.Event.SELECT, function(event){
+			if(confirm('您选择的备份会覆盖当前所有设置，确认要覆盖吗？')){
+				var bakFile = event.target ;
+				var fileStream = new air.FileStream();
+				fileStream.open(bakFile, air.FileMode.READ);
+				var savedJson = fileStream.readUTFBytes(fileStream.bytesAvailable);
+				fileStream.close();
+				try{
+					var json = {};
+					savedJson=JSON.parse(savedJson);
+					for(var key in savedJson)json[key]=savedJson[key];
+					settings.json = json;
+					settings.save();
+
+					app.updateHostMenu();
+					app.updateDnsMenu();
+					app.setSysDns();
+					app.updateToolsMenu();
+
+					app.loadCurTheme();
+
+					app.loadCurHost();
+				}
+				catch(e){}
+			}
+		});
+	}
+
+	//刷新远程hosts
+	app.updateRemoteHosts = function(bForce){
+		var remoteHostsUrl = settings.get('remoteHostsUrl');
+		if(remoteHostsUrl){
+			getUrl(remoteHostsUrl+(/\?/.test(remoteHostsUrl)?'&':'?')+'r='+new Date().getTime(), function(bSuccess, headers, text){
+				if(bSuccess === true){
+					updateRemoteHosts(text, bForce)
+				}
+			});
+		}
+	}
+
+	function updateRemoteHosts(text, bForce){
+		var oldRemoteHosts = settings.get('oldRemoteHosts') || '',
+			curHost = settings.get('curHost');
+
+		//判断远程内容是否发生变化
+		if(curHost === 0 && editor.bChanged() === false && (oldRemoteHosts !== text || bForce === true)){
+			//只允许在默认方案中使用，且是保存状态
+			settings.set('oldRemoteHosts', text);
+			settings.save();
+
+			var defRemoteGroupName = '远程Hosts';
+
+			//加载本地hosts
+			var hostsList = settings.get('hostsList');
+
+			var textHosts = hostsList[curHost].content,
+				arrTextHosts = textHosts.split(/\r?\n/g);
+
+			var arrHosts, lastGroupName = null;
+
+			//分析远程旧hosts
+			var mapOldRemoteGroup = {};
+			arrHosts = oldRemoteHosts.split(/\r?\n/);
+			arrHosts.forEach(function(line) {
+				var match = line.match(/^\s*#\s*=+\s*([^=]+?)\s*((?:\([^\(\)=]+\))*)\s*=+/i);
+				if(match !== null){
+					lastGroupName = match[1];
+					mapOldRemoteGroup[lastGroupName] = true;
+				}
+				else{
+					match = line.match(/^\s*((\d+\.){3}\d+\s+.+?)\s*(#|$)/);
+					if(match !== null && lastGroupName === null){
+						mapOldRemoteGroup[defRemoteGroupName] = true;
+					}
+				}
+			});
+
+			//分析远程新hosts
+			var mapNewRemoteGroup = {};
+			arrHosts = text.split(/\r?\n/);
+			lastGroupName = null;
+
+			arrHosts.forEach(function(line) {
+				var match = line.match(/^\s*#\s*=+\s*([^=]+?)\s*((?:\([^\(\)=]+\))*)\s*=+/i);
+				if(match !== null){
+					lastGroupName = match[1];
+					mapNewRemoteGroup[lastGroupName] = [];
+				}
+				else{
+					match = line.match(/^\s*((?:\d+\.){3}\d+\s+.+?)\s*(#.*|$)/);
+					if(match !== null){
+						if(lastGroupName === null){
+							lastGroupName = defRemoteGroupName;
+							mapNewRemoteGroup[lastGroupName] = [];
+						}
+						mapNewRemoteGroup[lastGroupName].push(match[1]+(match[2]?' '+match[2]:''));
+					}
+				}
+			});
+			
+			//清除旧hosts
+			var mapsLocalGroup = {},
+				line;
+			lastGroupName = null;
+			for(var i=0,l=arrTextHosts.length;i<l;i++){
+				line = arrTextHosts[i];
+				var match = line.match(/^\s*#\s*=+\s*([^=]+?)\s*((?:\([^\(\)=]+\))*)\s*=+/i);
+				if(match !== null){
+					if(mapOldRemoteGroup[match[1]]){
+						//标记为远程组，并默认关闭
+						lastGroupName = match[1];
+						mapsLocalGroup[lastGroupName] = false;
+					}
+					else{
+						//不是远程组
+						lastGroupName = null;
+					}
+				}
+				else if(lastGroupName !== null){
+					if(mapsLocalGroup[lastGroupName] === false && /^\s*(\d+\.){3}\d+/.test(line)){
+						//任意一行开启，代表整个组为开启
+						mapsLocalGroup[lastGroupName] = true;
+					}
+				}
+				if(lastGroupName !== null){
+					delete arrTextHosts[i];
+				}
+			}
+
+			//在结尾添加新Hosts
+			for(var name in mapNewRemoteGroup){
+				arrTextHosts.push('# ==================== '+name+' ====================');
+				arrTextHosts.push('');
+				mapNewRemoteGroup[name].forEach(function(line){
+					arrTextHosts.push((mapsLocalGroup[name]===true?'':'#! ')+line);
+				});
+				arrTextHosts.push('');
+			}
+
+			hostsList[curHost].content = arrTextHosts.filter(function(){return true;}).join('\r\n');
+			settings.save();
+
+			var bookmark = editor.getBookmark();
+			app.loadCurHost();
+			editor.setBookmark(bookmark);
+
+		}
+	}
+	
+	//CDN检测
+	app.showDnsCDNTest = function(){
+		var arrDnsList = settings.get('dnsList'),
+			curDns = settings.get('curDns'),
+			localDnsName = '本地DNS';
+		var htmlDnsList = [];
+		if(curDns !== -1){
+			htmlDnsList.push('<label for="dns-1"><input id="dns-1" name="dns" type="checkbox" value="-1" checked="checked" /> '+localDnsName+'</label>')
+		}
+		arrDnsList.forEach(function(dns,i){
+			if(i !== curDns){
+				htmlDnsList.push('<label for="dns'+i+'"><input id="dns'+i+'" name="dns" type="checkbox" value="'+i+'" checked="checked" /> '+dns.name+'</label>')
+			}
+		});
+		var jDnsCDNTest = $('<div class="appdialog dnscdn"><p>基准DNS: '+((curDns===-1?localDnsName:arrDnsList[curDns].name))+'</p><p>待测DNS: '+htmlDnsList.join(' ')+'</p><p>待测URL列表：<br /><br /><textarea id="urlList" style="width:500px;height:100px;"></textarea></p><p>检测结果：<span id="errorCount"></span></p><div id="testResult" style="border:1px solid #ccc;border-radius:3px;padding:5px;width:500px;height:100px;overflow:auto;word-break:break-all;"></div><p class="tip">说明：以当前选择的DNS为基准数据进行比较</p><p class="buttonline"><button id="btnStart">开始检测</button></p></div>');
+		var jUrlList = $('#urlList', jDnsCDNTest),
+			jErrorCount = $('#errorCount', jDnsCDNTest),
+			jTestResult = $('#testResult', jDnsCDNTest),
+			jBtnStart = $('#btnStart', jDnsCDNTest);
+		dialog.setTitle('CDN一致性检测').setContent(jDnsCDNTest).moveTo().show();
+
+		jUrlList.focus();
+
+		jBtnStart.click(function() {
+			var jCheckedDns = $('input:checked', jDnsCDNTest);
+			if(jCheckedDns.length === 0){
+				return alert('请选择待测DNS');
+			}
+			var urlList = jUrlList.val(),
+				mapUrl = {};
+			urlList.split(/\r?\n/).forEach(function(url){
+				var match = url.match(/^\s*(https?:\/\/.+)/i);
+				if(match !== null){
+					mapUrl[match[1]] = null;
+				}
+			});
+			var arrUrl = Object.keys(mapUrl);
+			if(arrUrl.length == 0){
+				jUrlList.focus();
+				return alert('请输入合法的待检测URL地址列表')
+			}
+			jErrorCount.html('检测中...');
+			jTestResult.html('');
+			jBtnStart.attr('disabled', true);
+			//获取基准数据
+			getUrlsWithDns(arrUrl, curDns===-1?'':arrDnsList[curDns].ip, function(mapBaseContent){
+				for(var url in mapBaseContent){
+					if(mapBaseContent[url] === false){
+						jBtnStart.attr('disabled', false);
+						return alert('基准数据获取失败：\r\n'+url);
+					}
+				}
+				
+				var allCount = jCheckedDns.length,
+					getCount = 0,
+					testCount = 0;
+					errorCount = 0;
+				jCheckedDns.each(function(){
+					var dnsId = parseInt($(this).val(),10);
+					(function(dnsId){
+						getUrlsWithDns(arrUrl, dnsId===-1?'':arrDnsList[dnsId].ip, function(allResult){
+							var arrHTMLResult = [];
+							for(var url in allResult){
+								var bError = mapBaseContent[url] !== allResult[url];
+								arrHTMLResult.push('<div style="border-radius:3px;margin:2px;padding:3px;background-color:'+(bError?'#FF3434':'#ADCC69')+';color:#222">'+url+ ' ' + (dnsId===-1?localDnsName:arrDnsList[dnsId].name)+' '+'<span style="font-size:14px;">'+(bError?'✖':'✓')+'</span></div>');
+								if(bError){
+									errorCount++;
+								}
+								testCount ++;
+							}
+							jTestResult.append(arrHTMLResult.join(''));
+							getCount++;
+							if(getCount === allCount){
+								jErrorCount.html('总共检测<strong>'+testCount+'</strong>次，其中发现错误<strong>'+errorCount+'</strong>次');
+								jBtnStart.attr('disabled', false);
+							}
+						});
+					})(dnsId);
+				});
+			});
+		});
 	}
 
 	_win.app = app;

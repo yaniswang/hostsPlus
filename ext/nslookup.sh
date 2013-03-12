@@ -1,0 +1,1 @@
+nslookup -nosearch $1 $2

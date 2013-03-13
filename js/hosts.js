@@ -80,11 +80,11 @@
 		if(content!==sysHosts){//与系统hosts有差异才保存
 			try{
 				writeFile(hostsPath, content, charset);
-				clearSysDns();
 			}
 			catch(e){
 				alert('hosts写入失败，请检查您系统的hosts文件是否有写入权限？\n'+hostsPath);
 			}
+			clearSysDns();
 		}
 	}
 

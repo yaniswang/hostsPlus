@@ -83,7 +83,7 @@
 				clearSysDns();
 			}
 			catch(e){
-				alert('hosts写入失败，请检查您系统的hosts文件是否有写入权限？');
+				alert('hosts写入失败，请检查您系统的hosts文件是否有写入权限？\n'+hostsPath);
 			}
 		}
 	}

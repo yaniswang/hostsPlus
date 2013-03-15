@@ -231,7 +231,7 @@ function getUrl(url, requestHeaders, callback){
 
 function nslookup(hostname, dnsserver, callback){
 	callExt('nslookup', hostname, dnsserver?dnsserver:null, function(str) {
-		var match = str.match(/(?:名称|Name):\s*[^\r\n]+\r?\nAddress(?:es)?:\s*((\d+\.){3}\d+)/i);
+		var match = str.match(/(?:名称|Name):\s*[^\r\n]+\r?\nAddress(?:es)?:.*?\s*((\d+\.){3}\d+)/i);
 		if(match !== null){
 			callback(true, match[1]);
 		}
@@ -259,28 +259,50 @@ function getUrlWithDns(url, dnsserver, callback){
 		var host = match[1];
 		nslookup(host, dnsserver, function(bSuccess, ip){
 			if(bSuccess === true){
-				getUrl(url.replace(/^(https?:\/\/)[^\/]+/,'$1'+ip), {'Host': host}, function(bSuccess, headers, data){
-					callback(bSuccess, ip, headers, data)
+				getUrl(url.replace(/^(https?:\/\/)[^\/]+/,'$1'+ip), {'Host': host,'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.22 (KHTML, like Gecko) Chrome/25.0.1364.152 Safari/537.22'}, function(bSuccess, headers, data){
+					callback(url, bSuccess, ip, headers, data)
 				});
 			}
 			else{
-				callback(false);
+				callback(url, false);
 			}
 		});
 	}
 }
 
+var getUrlDnsMax = 5,
+	getUrlDnsCount = 0;
+
 //以指定DNS请求多个URL
 function getUrlsWithDns(arrUrls, dnsserver, callback){
 	var allResult = {};
-	var allCount = arrUrls.length, getCount = 0;
-	arrUrls.forEach(function(url){
-		getUrlWithDns(url, dnsserver, function(bSuccess, ip, headers, data){
-			allResult[url] = bSuccess?data:false;
-			getCount ++;
-			if(getCount === allCount){
-				callback(allResult);
+	var allCount = arrUrls.length,
+		getCount = 0;
+	getUrlDnsCount = 0;
+	arrUrls = arrUrls.slice(0);
+	function getNext(){
+		if(getCount === allCount){
+			callback(allResult);
+		}
+		var poolLength = getUrlDnsMax - getUrlDnsCount,
+			url;
+		if(poolLength>0 && arrUrls.length>0){
+			for(var i=0;i<poolLength;i++){
+				url = arrUrls.shift();
+				getUrlDnsCount ++;
+				getUrlWithDns(url, dnsserver, function(url, bSuccess, ip, headers, data){
+					getUrlDnsCount --;
+					getCount ++;
+					allResult[url] = bSuccess?data:false;
+					// console.log(url,data)
+					getNext();
+				});
+				if(arrUrls.length === 0){
+					break;
+				}
 			}
-		});
-	});
+		}
+	}
+	getNext();
 }
+

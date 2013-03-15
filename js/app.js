@@ -1109,14 +1109,50 @@
 				htmlDnsList.push('<label for="dns'+i+'"><input id="dns'+i+'" name="dns" type="checkbox" value="'+i+'" checked="checked" /> '+dns.name+'</label>')
 			}
 		});
-		var jDnsCDNTest = $('<div class="appdialog dnscdn"><p>基准DNS: '+((curDns===-1?localDnsName:arrDnsList[curDns].name))+'</p><p>待测DNS: '+htmlDnsList.join(' ')+'</p><p>待测URL列表：<br /><br /><textarea id="urlList" style="width:500px;height:100px;"></textarea></p><p>检测结果：<span id="errorCount"></span></p><div id="testResult" style="border:1px solid #ccc;border-radius:3px;padding:5px;width:500px;height:100px;overflow:auto;word-break:break-all;"></div><p class="tip">说明：以当前选择的DNS为基准数据进行比较</p><p class="buttonline"><button id="btnStart">开始检测</button></p></div>');
+		var jDnsCDNTest = $('<div class="appdialog dnscdn"><p>基准DNS: '+((curDns===-1?localDnsName:arrDnsList[curDns].name))+'</p><p>待测DNS: '+htmlDnsList.join(' ')+'</p><p>待测URL列表：<br /><br /><textarea id="urlList" style="width:500px;height:100px;"></textarea></p><p>检测结果：<span id="errorCount"></span></p><div id="testResult" style="border:1px solid #ccc;border-radius:3px;padding:5px;width:500px;height:100px;overflow:auto;word-break:break-all;"></div><p class="tip">说明：以当前选择的DNS为基准数据进行比较</p><p class="buttonline"><button id="btnClear">清空列表</button> <button id="btnImportHar">导入HAR文件</button> <button id="btnStart">开始检测</button></p></div>');
 		var jUrlList = $('#urlList', jDnsCDNTest),
 			jErrorCount = $('#errorCount', jDnsCDNTest),
 			jTestResult = $('#testResult', jDnsCDNTest),
+			jbtnClear = $('#btnClear', jDnsCDNTest),
+			jBtnImportHar = $('#btnImportHar', jDnsCDNTest),
 			jBtnStart = $('#btnStart', jDnsCDNTest);
 		dialog.setTitle('CDN一致性检测').setContent(jDnsCDNTest).moveTo().show();
 
 		jUrlList.focus();
+
+		jbtnClear.click(function(){
+			jUrlList.val('');
+		});
+
+		jBtnImportHar.click(function(){
+			var file = new air.File();
+			var harFilter = new air.FileFilter("HAR file", "*.har")
+			file.browseForOpen("请选择要导入的har文件", [harFilter]);
+			file.addEventListener(air.Event.SELECT, function(event){
+				var bakFile = event.target ;
+				var fileStream = new air.FileStream();
+				fileStream.open(bakFile, air.FileMode.READ);
+				var harStr = fileStream.readUTFBytes(fileStream.bytesAvailable);
+				fileStream.close();
+				try{
+					var harJson = {};
+					harJson=JSON.parse(harStr);
+					var reUrlTest = /^((application|text)\/(x-)?javascript|text\/css)$/i;
+					var arrUrls = [];
+					harJson.log.entries.forEach(function(entrie){
+						var mimeType = entrie.response.content.mimeType,
+							url = entrie.request.url;
+						if(mimeType && reUrlTest.test(mimeType) && url){
+							arrUrls.push(url);
+						}
+					});
+					jUrlList.val(arrUrls.join('\r\n'));
+				}
+				catch(e){
+					alert('HAR文件解析失败！');
+				}
+			});
+		});
 
 		jBtnStart.click(function() {
 			var jCheckedDns = $('input:checked', jDnsCDNTest);

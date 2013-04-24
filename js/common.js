@@ -188,30 +188,31 @@ function setIeDns(disable) {
 	callExt('setiedns', disable);
 }
 
-//抓取URL
-function getUrl(url, requestHeaders, callback){
-	var request = new air.URLRequest(url); 
-	var loader = new air.URLLoader(); 
-	if(callback === undefined){
-		callback = requestHeaders;
-		requestHeaders = null;
-	}
-	if(requestHeaders !== null){
-		for(var name in requestHeaders){
-			request.requestHeaders.push(new air.URLRequestHeader(name, requestHeaders[name]));
-		}
-	}
-	var responseStatus;
-		mapResponseHeaders = {};
+var arrUrlLoader = [],
+	urlPoolLimit = 2;
+var arrUrlPool = [];
+
+//初始化URL加载器
+for(var i=0;i<urlPoolLimit;i++){
+	addUrlLoader();
+}
+
+function addUrlLoader(){
+	var loaderObj = {
+		bBusy: false
+	};
+	var loader = new air.URLLoader();
+	var responseStatus, mapResponseHeaders;
 	loader.addEventListener(air.HTTPStatusEvent.HTTP_RESPONSE_STATUS, function(e){
 		responseStatus = e.status;
-		var mapHeaders = {};
 		var responseHeaders = e.responseHeaders;
+		mapResponseHeaders = {};
 		for(var i=0,l=responseHeaders.length;i<l;i++){
 			mapResponseHeaders[responseHeaders[i].name] = responseHeaders[i].value;
 		}
 	});
 	loader.addEventListener(air.Event.COMPLETE, function(e){
+		var callback = loaderObj.callback;
 		if(callback){
 			if(responseStatus === 200){
 				callback(true, mapResponseHeaders, e.target.data);
@@ -222,11 +223,55 @@ function getUrl(url, requestHeaders, callback){
 		}
 	});
 	loader.addEventListener(air.IOErrorEvent.IO_ERROR, function(e){
+		var callback = loaderObj.callback;
 		if(callback){
 			callback(false, e);
 		}
 	});
-	loader.load(request);
+	loaderObj.loader = loader;
+	arrUrlLoader[arrUrlLoader.length] = loaderObj;
+}
+
+//抓取URL
+function getUrl(url, requestHeaders, callback){
+	var request = new air.URLRequest(url); 
+	if(callback === undefined){
+		callback = requestHeaders;
+		requestHeaders = null;
+	}
+	if(requestHeaders !== null){
+		for(var name in requestHeaders){
+			request.requestHeaders.push(new air.URLRequestHeader(name, requestHeaders[name]));
+		}
+	}
+	arrUrlPool.push({
+		request:request,
+		callback: callback
+	});
+	checkNextUrl();
+}
+
+function checkNextUrl(){
+	var loaderObj;
+	for(var i=0;i<urlPoolLimit;i++){
+		loaderObj = arrUrlLoader[i];
+		if(loaderObj.bBusy === false){
+			var urlObj = arrUrlPool.shift();
+			if(urlObj !== undefined){
+				startUrlLoader(loaderObj, urlObj);
+			}
+		}
+	}
+}
+
+function startUrlLoader(loaderObj, urlObj){
+	loaderObj.bBusy = true;
+	loaderObj.callback = function(){
+		loaderObj.bBusy = false;
+		urlObj.callback.apply(this, arguments);
+		checkNextUrl();
+	}
+	loaderObj.loader.load(urlObj.request);
 }
 
 function nslookup(hostname, dnsserver, callback){

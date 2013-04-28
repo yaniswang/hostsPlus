@@ -235,13 +235,6 @@
 			menuItemSeparate.name = 'dnsBottom';
 		}
 
-		var menuItemAllGroupOff = menuIcon.addItem(new air.NativeMenuItem('关闭所有分组'));
-		menuItemAllGroupOff.name = 'setgroupoff';
-		menuItemAllGroupOff.addEventListener(air.Event.SELECT, app.menuSelect);
-
-		menuItemSeparate = menuIcon.addItem(new air.NativeMenuItem('----', true));
-		menuItemSeparate.name = 'groupBottom';
-
 		var menuItemToggleShow = menuIcon.addItem(new air.NativeMenuItem('显示/隐藏'));
 		menuItemToggleShow.name = 'toggleshow';
 		menuItemToggleShow.addEventListener(air.Event.SELECT, app.menuSelect);
@@ -609,6 +602,28 @@
 			menuItemHost.checked = curHost === i ? true : false;
 			menuItemHost.addEventListener(air.Event.SELECT, app.menuSelect);
 		}
+
+		//系统栏菜单
+		arrMenuItem = menuIcon.items;
+		for (var i = 0, c = arrMenuItem.length; i < c; i++) {
+			menuItem = arrMenuItem[i];
+			if (menuItem.name === 'dnsBottom') addPos = menuIcon.getItemIndex(menuItem) + 1;
+			if (/^(sethost|hostBottom)$/i.test(menuItem.name)) menuIcon.removeItem(menuItem);
+		}
+
+		if(hostsList.length > 0){
+			for (var i = 0, c = hostsList.length; i < c; i++) {
+				host = hostsList[i];
+				menuItemHost = menuIcon.addItemAt(new air.NativeMenuItem(host.name), addPos++);
+				menuItemHost.name = 'sethost';
+				menuItemHost.data = i;
+				menuItemHost.checked = curHost === i ? true : false;
+				menuItemHost.addEventListener(air.Event.SELECT, app.menuSelect);
+			}
+
+			menuItemSeparate = menuIcon.addItemAt(new air.NativeMenuItem('----', true),addPos++);
+			menuItemSeparate.name = 'hostBottom';
+		}
 	}
 
 	//更新host分组菜单
@@ -667,17 +682,26 @@
 		arrMenuItem = menuIcon.items;
 		for (var i = 0, c = arrMenuItem.length; i < c; i++) {
 			menuItem = arrMenuItem[i];
-			if (menuItem.name === 'groupBottom') addPos = menuIcon.getItemIndex(menuItem);
-			if (menuItem.name === 'setgroup') menuIcon.removeItem(menuItem);
+			if (menuItem.name === 'toggleshow') addPos = menuIcon.getItemIndex(menuItem);
+			if (/^(setgroupoff|setgroup|groupBottom)$/i.test(menuItem.name)) menuIcon.removeItem(menuItem);
 		}
 
-		arrGroups.forEach(function(group) {
-			menuItemHost = menuIcon.addItemAt(new air.NativeMenuItem(group.name),addPos++);
-			menuItemHost.name='setgroup';
-			menuItemHost.data=group.data;
-			menuItemHost.checked=group.bOn;
-			menuItemHost.addEventListener(air.Event.SELECT , app.menuSelect);
-		});
+		if(arrGroups.length > 0){
+			var menuItemAllGroupOff = menuIcon.addItemAt(new air.NativeMenuItem('关闭所有分组'),addPos++);
+			menuItemAllGroupOff.name = 'setgroupoff';
+			menuItemAllGroupOff.addEventListener(air.Event.SELECT, app.menuSelect);
+
+			arrGroups.forEach(function(group) {
+				menuItemHost = menuIcon.addItemAt(new air.NativeMenuItem(group.name),addPos++);
+				menuItemHost.name='setgroup';
+				menuItemHost.data=group.data;
+				menuItemHost.checked=group.bOn;
+				menuItemHost.addEventListener(air.Event.SELECT , app.menuSelect);
+			});
+
+			menuItemSeparate = menuIcon.addItemAt(new air.NativeMenuItem('----', true),addPos++);
+			menuItemSeparate.name = 'groupBottom';
+		}
 
 	}
 

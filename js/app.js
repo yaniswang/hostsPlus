@@ -611,7 +611,7 @@
 			if (/^(sethost|hostBottom)$/i.test(menuItem.name)) menuIcon.removeItem(menuItem);
 		}
 
-		if(hostsList.length > 0){
+		if(hostsList.length > 1){
 			for (var i = 0, c = hostsList.length; i < c; i++) {
 				host = hostsList[i];
 				menuItemHost = menuIcon.addItemAt(new air.NativeMenuItem(host.name), addPos++);

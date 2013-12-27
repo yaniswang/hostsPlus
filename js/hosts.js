@@ -33,7 +33,6 @@
 				match=line.match(/^\s*([^\s]+)\s+.+/);
 				if(match!==null){
 					arrPingList[match[1].toLowerCase()] = true;
-					//arrPingList.push(match[1].toLowerCase());
 				}
 			}
 		});
@@ -93,8 +92,11 @@
 		return readFile(hostsPath, true, charset);
 	}
 
-	setInterval(hosts.update,settings.get('updateInterval')*1000);
-	setTimeout(hosts.update,100);
+	if(isWin){
+		// Win下开启机器名解析
+		setInterval(hosts.update,settings.get('updateInterval')*1000);
+		setTimeout(hosts.update,100);
+	}
 
 	_win.hosts=hosts;
 })(jQuery,window);

@@ -109,6 +109,20 @@ function getLocalIP() {
 	return arrLocalIP;
 }
 
+// 获得当前激活网卡名
+function getActiveNetname(){
+	var arrInterfaces = air.NetworkInfo.networkInfo.findInterfaces(),
+		interfaceObj;
+	if (arrInterfaces !== null) {
+		for (var i = 0, count1 = arrInterfaces.length; i < count1; i++) {
+			interfaceObj = arrInterfaces[i];
+			if (interfaceObj.active) {
+				return interfaceObj.displayName;
+			}
+		}
+	}
+}
+
 
 //访问外部扩展
 function callExt(api) {
@@ -171,7 +185,8 @@ function ping(hostname, callback) {
 }
 
 //设置系统DNS
-function setSysDns(netname, dnsip) {
+function setSysDns(dnsip) {
+	var netname = getActiveNetname();
 	callExt('setsysdns', netname, dnsip ? dnsip : 'clear');
 }
 

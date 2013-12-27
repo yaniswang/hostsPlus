@@ -413,19 +413,9 @@
 
 	//设置系统DNS
 	app.setSysDns = function() {
-		var bWifi = settings.get('bWifi'),
-			arrDnsList = settings.get('dnsList'),
+		var arrDnsList = settings.get('dnsList'),
 			curDns = settings.get('curDns');
-		var netname;
-		if(isWin){
-			netname = bWifi ? '无线网络连接' : '本地连接'
-		}
-		else if(isMac){
-			netname = bWifi ? 'Wi-Fi' : 'Ethernet'
-		}
-		if(netname){
-			setSysDns(netname, curDns != -1 ? arrDnsList[curDns].ip : '');
-		}
+		setSysDns(curDns != -1 ? arrDnsList[curDns].ip : '');
 	}
 
 	//更新工具菜单
@@ -502,23 +492,19 @@
 
 	//显示DNS设置界面
 	app.showDnsSetup = function() {
-		var $DnsSetup = $('<div class="appdialog dnssetup"><p'+(isLinux?' style="display:none;"':'')+'><label for="bWifi">无线网络：</label> <input id="bWifi" type="checkbox" /></p><p>DNS列表：<br /><br /><textarea id="DnsList"></textarea><br /><span class="tip">示例：美国DNS 8.8.8.8 (中间以空格分隔，多行为多个DNS)</span></p><p class="buttonline"><button id="btnSave">保存修改</button></p></div>');
-		var $bWifi = $('#bWifi', $DnsSetup),
-			$DnsList = $('#DnsList', $DnsSetup),
+		var $DnsSetup = $('<div class="appdialog dnssetup"><p>DNS列表：<br /><br /><textarea id="DnsList"></textarea><br /><span class="tip">示例：美国DNS 8.8.8.8 (中间以空格分隔，多行为多个DNS)</span></p><p class="buttonline"><button id="btnSave">保存修改</button></p></div>');
+		var $DnsList = $('#DnsList', $DnsSetup),
 			$btnSave = $('#btnSave', $DnsSetup);
 		dialog.setTitle('编辑DNS').setContent($DnsSetup).moveTo().show();
 
-		var bWifi = settings.get('bWifi'),
-			arrDnsList = settings.get('dnsList'),
+		var arrDnsList = settings.get('dnsList'),
 			arrStrDnsList = [];
 		$.each(arrDnsList, function(id, dns) {
 			arrStrDnsList.push(dns.name + ' ' + dns.ip);
 		});
-		$bWifi.attr('checked', bWifi ? true : false);
 		$DnsList.val(arrStrDnsList.join('\r\n'));
 
 		$btnSave.click(function() {
-			settings.set('bWifi', $bWifi.attr('checked') ? true : false);
 			arrStrDnsList = $DnsList.val().split(/\r?\n/);
 			arrDnsList = [];
 			var errMsg = null;

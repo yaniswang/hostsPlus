@@ -37,6 +37,8 @@
 		app.updateToolsMenu();
 
 		editor.init();
+		var fontSize = settings.get('fontSize');
+		$('.CodeMirror').css('fontSize', fontSize);
 		editor.on('change', function(){
 			app.updateTitle();
 		});
@@ -133,6 +135,10 @@
 		var menuItemHostsDelete = menuHosts.addItem(new air.NativeMenuItem('删除当前方案'));
 		menuItemHostsDelete.name = 'hostsdel';
 		menuItemHostsDelete.addEventListener(air.Event.SELECT, app.menuSelect);
+
+		var menuItemHostsSave = menuHosts.addItem(new air.NativeMenuItem('保存当前方案'));
+		menuItemHostsSave.name = 'hostssave';
+		menuItemHostsSave.addEventListener(air.Event.SELECT, app.menuSelect);
 
 		menuHosts.addItem(new air.NativeMenuItem('----', true));
 
@@ -289,6 +295,9 @@
 			break;
 		case 'hostsdel':
 			app.delHosts();
+			break;
+		case 'hostssave':
+			editor.save();
 			break;
 		case 'setgroup':
 			app.setHostsGroup(target.label, !target.checked, target.data);
@@ -544,8 +553,11 @@
 		if(match){
 			ver = match[1];
 		}
-		var $about = $('<div class="appdialog about"><h1>hostsPlus</h1><p class="ver">v'+ver+'</p><p></p><p>hostsPlus是一个hosts增强编辑软件，主要实现以下功能增强：</p><ol><li>hosts方案管理</li><li>hosts分组管理</li><li>重定向到主机名或域名</li><li>DNS切换</li></ol><p>联系作者：<a href="mailto:yanis.wang@gmail.com">yanis.wang@gmail.com</a></p><p class="buttonline"><button id="btnOk">确定</button></p></div>');
+		var $about = $('<div class="appdialog about"><h1>hostsPlus</h1><p class="ver">v'+ver+'</p><p></p><p>hostsPlus是一个hosts增强编辑软件，主要实现以下功能增强：</p><ol><li>hosts方案管理</li><li>hosts分组管理</li><li>DNS切换</li></ol><p>源代码：<a href="#" id="sourceCode">https://github.com/yaniswang/hostsPlus</a></p><p class="buttonline"><button id="btnOk">确定</button></p></div>');
 		var $btnOk = $('#btnOk', $about);
+		$('#sourceCode', $about).on('click', function(){
+			navigateToURL('https://github.com/yaniswang/hostsPlus');
+		});
 		dialog.setTitle('关于hostsPlus').setContent($about).moveTo().show();
 
 		$btnOk.click(function(){
@@ -800,9 +812,10 @@
 
 	//显示首选项
 	app.showPreference = function(){
-		var $preference = $('<div class="appdialog preference"><p><label for="bStartAtLogin">开机启动：</label> <input id="bStartAtLogin" type="checkbox" /></p><p><label for="bHideAfterStart">启动后隐藏：</label> <input id="bHideAfterStart" type="checkbox" /></p><p class="buttonline"><button id="btnSave">保存修改</button></p></div>');
+		var $preference = $('<div class="appdialog preference"><p><label for="bStartAtLogin">开机启动：</label> <input id="bStartAtLogin" type="checkbox" /></p><p><label for="bHideAfterStart">启动后隐藏：</label> <input id="bHideAfterStart" type="checkbox" /></p><p>字体大小：<input id="fontSize" type="text" style="width:60px" /></p><p class="buttonline"><button id="btnSave">保存修改</button></p></div>');
 		var $bStartAtLogin = $('#bStartAtLogin', $preference),
 			$bHideAfterStart = $('#bHideAfterStart', $preference),
+			$fontSize = $('#fontSize', $preference),
 			$btnSave = $('#btnSave', $preference);
 		dialog.setTitle('首选项').setContent($preference).moveTo().show();
 
@@ -810,12 +823,15 @@
 
 		$bStartAtLogin.attr('checked', bStartAtLogin ? true : false);
 		$bHideAfterStart.attr('checked', bHideAfterStart ? true : false);
+		$fontSize.val(settings.get('fontSize'));
 
 		$btnSave.click(function(){
 			bStartAtLogin = $bStartAtLogin.attr('checked') ? true : false;
 			settings.set('bStartAtLogin', bStartAtLogin);
 			settings.set('bHideAfterStart', $bHideAfterStart.attr('checked') ? true : false);
-			settings.save();
+			var fontSize = $fontSize.val()
+			settings.set('fontSize', fontSize);
+			$('.CodeMirror').css('fontSize', fontSize);
 			app.setStartAtLogin(bStartAtLogin);
 			alert('修改成功');
 			dialog.hide();
@@ -923,7 +939,7 @@
 
 	//显示使用指南
 	app.showManual = function(){
-		air.navigateToURL(new air.URLRequest('https://github.com/yaniswang/hostsPlus/wiki/manual'));
+		navigateToURL('https://github.com/yaniswang/hostsPlus/wiki/manual');
 	}
 
 	//保存最新编辑结果
@@ -1004,7 +1020,6 @@
 		if(curHost === 0 && editor.bChanged() === false && (oldRemoteHosts !== text || bForce === true)){
 			//只允许在默认方案中使用，且是保存状态
 			settings.set('oldRemoteHosts', text);
-			settings.save();
 
 			var defRemoteGroupName = '远程Hosts';
 

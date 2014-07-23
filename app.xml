@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<application xmlns="http://ns.adobe.com/air/application/2.6">
+<application xmlns="http://ns.adobe.com/air/application/14.0">
 	<id>hostsplus</id>
 	<name>hostsPlus</name>
 	<filename>hostsPlus</filename>
-	<versionNumber>0.9.8</versionNumber>
-	<versionLabel>0.9.8(build 20131227)</versionLabel>
+	<versionNumber>1.0.0</versionNumber>
+	<versionLabel>1.0.0 beta(build 20140723)</versionLabel>
 	<description>
 		<text xml:lang="en">hostsPlus is a editor for hosts file.</text>
 		<text xml:lang="zh-cn">hostsPlus是一个hosts增强编辑软件。</text>

@@ -18,12 +18,10 @@
 		//hosts方案列表
 		hostsList:[],
 		curHost:-1,
-		//定时刷新hosts间隔，单位：秒
-		updateInterval:5,
+		//默认字体大小
+		fontSize: '14pt',
 		//定时刷新远程hosts间隔
 		remoteUpdateInterval:5,
-		//是否为WIFI连接
-		bWifi:false,
 		//DNS列表
 		dnsList:[{name:'美国DNS',ip:'8.8.8.8'}],
 		//当前选择的DNS
@@ -41,7 +39,6 @@
 
 	if(isWin){
 		defaultSettings['toolsList'].push({name:'关闭IE DNS缓存',cmd:'iedns',enable:false});
-		defaultSettings['toolsList'].push({name:'关闭FF DNS缓存',cmd:'ffdns'});
 	}
 
 	//从存储器恢复参数

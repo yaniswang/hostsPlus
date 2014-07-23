@@ -10,23 +10,21 @@
 	var bWorking = false;
 	var groupId = 1;
 
-
-	//编辑器初始化
-	var keyMaps = {};
-	keyMaps[ctrlKey+'-Q']=function() {
-		editor.toogleSelectionLine(true);
-	}
-	keyMaps[ctrlKey+'-/']=function() {
-		editor.toogleSelectionLine();
-	}
-	keyMaps[ctrlKey+'-G']=function() {
-		editor.addNewGroup();
-	}
-	keyMaps[ctrlKey+'-S']=function() {
-		codeMirror.clearHistory();
-		editor.trigger('save');
-	}
 	editor.init = function() {
+
+		//编辑器初始化
+		var keyMaps = {};
+		keyMaps[ctrlKey+'-Q']=function() {
+			editor.toogleSelectionLine(true);
+		}
+		keyMaps[ctrlKey+'-/']=function() {
+			editor.toogleSelectionLine();
+		}
+		keyMaps[ctrlKey+'-G']=function() {
+			editor.addNewGroup();
+		}
+		keyMaps[ctrlKey+'-S']=editor.save;
+
 		codeMirror = CodeMirror(document.body, {
 			lineNumbers: true,
 			fixedGutter: true,
@@ -152,6 +150,12 @@
 		var strGroupId = 'group ' + groupId++;
 		codeMirror.setLine(fromLine, '\r\n# ==================== ' + strGroupId + ' ====================\r\n\r\n' + strLine);
 		codeMirror.setSelection({line:fromLine+1, ch:23}, {line:fromLine+1, ch:23 + strGroupId.length});
+	}
+
+	// 保存编辑
+	editor.save = function(){
+		codeMirror.clearHistory();
+		editor.trigger('save');
 	}
 
 	_win.editor = editor;

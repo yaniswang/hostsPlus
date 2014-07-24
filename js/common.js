@@ -398,6 +398,7 @@ function getUrlsWithDns(arrUrls, dnsserver, callback){
 	getNext();
 }
 
+// 在外部浏览器中打开URL
 function navigateToURL(url){
 	air.navigateToURL(new air.URLRequest(url));
 }

@@ -37,6 +37,7 @@
 		app.updateToolsMenu();
 
 		editor.init();
+		// 设置编辑器字体大小
 		var fontSize = settings.get('fontSize');
 		$('.CodeMirror').css('fontSize', fontSize);
 		editor.on('change', function(){

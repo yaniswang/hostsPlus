@@ -1,8 +1,11 @@
 hostsPlus
 ================
 
+![hostsPlus logo](https://raw.github.com/yaniswang/hostsPlus/master/img/logo.png)
+
 hostsPlus是一款强大的hosts增强管理软件，可以方便高效的管理您的hosts绑定，是您开发的得力助手。
 
+![hostsPlus screenshot](https://raw.github.com/yaniswang/hostsPlus/master/img/screenshot.png)
 
 功能
 ================

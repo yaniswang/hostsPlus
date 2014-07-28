@@ -20,7 +20,6 @@
 		<resizable>true</resizable>
 		<width>1024</width>
 		<height>768</height>
-		<requestedDisplayResolution>high</requestedDisplayResolution>
 	</initialWindow>
 	<icon>
 		<image16x16>icons/icon16.png</image16x16>

@@ -81,7 +81,10 @@
 				writeFile(hostsPath, content, charset);
 			}
 			catch(e){
-				alert('hosts写入失败，请检查您系统的hosts文件是否有写入权限？\n'+hostsPath);
+				var isShowHelp = confirm('hosts写入失败, 需要查看帮助信息吗？');
+				if(isShowHelp){
+					navigateToURL('https://github.com/yaniswang/hostsPlus/wiki/access');
+				}
 			}
 			clearSysDns();
 		}

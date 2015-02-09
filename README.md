@@ -23,6 +23,11 @@ hostsPlus是一款强大的hosts增强管理软件，可以方便高效的管理
 
 1. 使用手册： [https://github.com/yaniswang/hostsPlus/wiki/manual](https://github.com/yaniswang/hostsPlus/wiki/manual)
 
+下载
+================
+
+Releases: [https://github.com/yaniswang/hostsPlus/releases](https://github.com/yaniswang/hostsPlus/releases)
+
 协议
 ================
 

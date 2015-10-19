@@ -24,6 +24,9 @@
 			editor.addNewGroup();
 		}
 		keyMaps[ctrlKey+'-S']=editor.save;
+		keyMaps['Shift-'+ctrlKey+'-F']=function(){
+			editor.format();
+		};
 
 		codeMirror = CodeMirror(document.body, {
 			lineNumbers: true,
@@ -150,6 +153,23 @@
 		var strGroupId = 'group ' + groupId++;
 		codeMirror.setLine(fromLine, '\r\n# ==================== ' + strGroupId + ' ====================\r\n\r\n' + strLine);
 		codeMirror.setSelection({line:fromLine+1, ch:23}, {line:fromLine+1, ch:23 + strGroupId.length});
+	}
+
+	// 格式化hosts
+	editor.format = function(){
+		codeMirror.eachLine(function(lineInfo){
+			var lineNumber = codeMirror.getLineNumber(lineInfo);
+			var text = lineInfo.text;
+			text = text.replace(/^\s*(#!?)?\s*([^\s]+)\s+(.+)/, function(all, comment, ip, others){
+				if(isIp(ip)){
+					var ipLen = /:/.test(ip) ? 41: 16;
+					var space = new Array(ipLen-ip.length).join(' ');
+					return (comment?comment+' ':'') + ip + space + others;
+				}
+				return all;
+			});
+			codeMirror.setLine(lineNumber, text);
+		});
 	}
 
 	// 保存编辑

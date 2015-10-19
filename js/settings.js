@@ -27,19 +27,13 @@
 		//当前选择的DNS
 		curDns:-1,
 		//当前选择的主题
-		curTheme:0,
-		//工具列表
-		toolsList : [{name:'当前主机名',cmd:'hostname'},{name:'本机IP列表',cmd:'localip'}]
+		curTheme:0
 	};
 
 	var settings={
 		//主题列表
 		themeList:['Bespin', 'Dawn']
 	};
-
-	if(isWin){
-		defaultSettings['toolsList'].push({name:'关闭IE DNS缓存',cmd:'iedns',enable:false});
-	}
 
 	//从存储器恢复参数
 	settings.load=function(){

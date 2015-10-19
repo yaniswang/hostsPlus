@@ -6,7 +6,7 @@
  */
 (function($, _win, undefined) {
 
-	var menuDns, menuHosts, menuGroup, menuSettingsTheme, menuTools;
+	var menuDns, menuHosts, menuGroup, menuSettingsTheme;
 	var menuIcon;
 
 	var dialog;
@@ -34,7 +34,6 @@
 
 		app.updateHostMenu();
 		app.updateDnsMenu();
-		app.updateToolsMenu();
 
 		editor.init();
 		// 设置编辑器字体大小
@@ -151,6 +150,10 @@
 		//切换分组
 		menuGroup = new air.NativeMenu();
 
+		var menuItemAddNewGroup = menuGroup.addItem(new air.NativeMenuItem('添加分组'));
+		menuItemAddNewGroup.name = 'addnewgroup';
+		menuItemAddNewGroup.addEventListener(air.Event.SELECT, app.menuSelect);
+
 		var menuItemAllGroupOff = menuGroup.addItem(new air.NativeMenuItem('关闭所有分组'));
 		menuItemAllGroupOff.name = 'setgroupoff';
 		menuItemAllGroupOff.addEventListener(air.Event.SELECT, app.menuSelect);
@@ -174,7 +177,19 @@
 		menuItemDnsCdn.addEventListener(air.Event.SELECT, app.menuSelect);
 
 		//工具菜单
-		menuTools = new air.NativeMenu();
+		var menuTools = new air.NativeMenu();
+		var arrToolsList = [
+			{name:'当前主机名',cmd:'hostname'},
+			{name:'本机IP列表',cmd:'localip'},
+			{name:'格式化',cmd:'format'}
+		];
+		var tool, menuItem;
+		for (var i = 0, c = arrToolsList.length; i < c; i++) {
+			tool = arrToolsList[i];
+			menuItem = menuTools.addItemAt(new air.NativeMenuItem(tool.name), i);
+			menuItem.name = tool.cmd;
+			menuItem.addEventListener(air.Event.SELECT, app.menuSelect);
+		}
 
 		//设置菜单
 		var menuSettings = new air.NativeMenu();
@@ -183,12 +198,12 @@
 		menuSettingsPreference.name = 'preference';
 		menuSettingsPreference.addEventListener(air.Event.SELECT, app.menuSelect);
 
+		menuSettingsTheme = new air.NativeMenu();
+		menuSettings.addSubmenu(menuSettingsTheme, '主题');
+
 		var menuRemoteHostsSetup = menuSettings.addItem(new air.NativeMenuItem('远程Hosts'));
 		menuRemoteHostsSetup.name = 'remotehostssetup';
 		menuRemoteHostsSetup.addEventListener(air.Event.SELECT, app.menuSelect);
-
-		menuSettingsTheme = new air.NativeMenu();
-		menuSettings.addSubmenu(menuSettingsTheme, '主题');
 
 		menuSettings.addItem(new air.NativeMenuItem('----', true));
 
@@ -208,6 +223,10 @@
 		var menuItemManual = menuHelp.addItem(new air.NativeMenuItem('使用指南'));
 		menuItemManual.name = 'manual';
 		menuItemManual.addEventListener(air.Event.SELECT, app.menuSelect);
+
+		var menuItemShortcut = menuHelp.addItem(new air.NativeMenuItem('快捷键'));
+		menuItemShortcut.name = 'shortcut';
+		menuItemShortcut.addEventListener(air.Event.SELECT, app.menuSelect);
 
 		var menuItemAbout = menuHelp.addItem(new air.NativeMenuItem('关于'));
 		menuItemAbout.name = 'about';
@@ -303,6 +322,9 @@
 		case 'setgroup':
 			app.setHostsGroup(target.label, !target.checked, target.data);
 			break;
+		case 'addnewgroup':
+			editor.addNewGroup();
+			break;
 		case 'setgroupoff':
 			app.setHostsGroup('',false);
 			break;
@@ -313,6 +335,7 @@
 			settings.set('curDns', target.data);
 			app.setSysDns();
 			app.updateDnsMenu()
+			app.updateTitle();
 			break;
 		case 'dnssetup':
 			app.showDnsSetup();
@@ -333,11 +356,20 @@
 		case 'restore':
 			app.restore();
 			break;
-		case 'tools':
-			app.execTools(target.data);
+		case 'hostname':
+			app.showHostName();
+			break;
+		case 'localip':
+			app.showLocalIp();
+			break;
+		case 'format':
+			editor.format();
 			break;
 		case 'manual':
 			app.showManual();
+			break;
+		case 'shortcut':
+			app.showShortCut();
 			break;
 		case 'about':
 			app.showAbout();
@@ -358,7 +390,11 @@
 	app.updateTitle = function(){
 		var hostsList = settings.get('hostsList'),
 			curHost = settings.get('curHost');
-		document.title = (editor.bChanged()?' *':'') + hostsList[curHost].name + ' - hostsPlus';
+		var arrDnsList = settings.get('dnsList'),
+			curDns = settings.get('curDns');
+		var dnsInfo = arrDnsList[curDns];
+		var dnsName = dnsInfo ? dnsInfo.name : '本地DNS';
+		document.title = (editor.bChanged()?' *':'') + hostsList[curHost].name + ' - ' + dnsName + ' - hostsPlus';
 	}
 
 	//更新DNS菜单
@@ -426,51 +462,6 @@
 		var arrDnsList = settings.get('dnsList'),
 			curDns = settings.get('curDns');
 		setSysDns(curDns != -1 ? arrDnsList[curDns].ip : '');
-	}
-
-	//更新工具菜单
-	app.updateToolsMenu = function() {
-		var arrToolsList = settings.get('toolsList');
-		var tool;
-
-		var arrMenuItem, menuItem;
-		arrMenuItem = menuTools.items;
-		for (var i = 0, c = arrMenuItem.length; i < c; i++) {
-			menuItem = arrMenuItem[i];
-			menuTools.removeItem(menuItem);
-		}
-
-		for (var i = 0, c = arrToolsList.length; i < c; i++) {
-			tool = arrToolsList[i];
-			menuItem = menuTools.addItemAt(new air.NativeMenuItem(tool.name), i);
-			menuItem.name = 'tools';
-			menuItem.data = i;
-			menuItem.checked = tool.enable ? true : false;
-			menuItem.addEventListener(air.Event.SELECT, app.menuSelect);
-		}
-	}
-
-	//执行工具
-	app.execTools = function(i) {
-		var arrToolsList = settings.get('toolsList'),
-			tool = arrToolsList[i],
-			cmd = tool.cmd;
-		if (tool.enable !== undefined) tool.enable = !tool.enable;
-		switch (tool.cmd) {
-			case 'hostname':
-				app.showHostName();
-				break;
-			case 'localip':
-				app.showLocalIp();
-				break;
-			case 'iedns':
-				setIeDns(tool.enable ? '1' : '0');
-				break;
-			case 'ffdns':
-				air.navigateToURL(new air.URLRequest('https://addons.mozilla.org/zh-cn/firefox/addon/hostadmin/'));
-				break;
-		}
-		app.updateToolsMenu();
 	}
 
 	//显示主机名
@@ -544,6 +535,38 @@
 				app.updateDnsMenu();
 			}
 		});
+	}
+
+	// 显示快捷键
+	app.showShortCut = function(){
+		var mapShortcuts = {
+			'Ctrl + Tab': '切换hosts方案',
+			'Ctrl + Q': '切换启用状态',
+			'Ctrl + /': '切换注释状态',
+			'Ctrl + G': '新建分组',
+			'Ctrl + A': '全选',
+			'Ctrl + C': '复制',
+			'Ctrl + X': '剪切',
+			'Ctrl + V': '粘贴',
+			'Ctrl + Shift + F': '格式化',
+			'Ctrl + Z': '撤销',
+			'Ctrl + Y': '恢复',
+			'Ctrl + S': '保存hosts',
+			'Ctrl + F': '搜索',
+			'F3': '搜索下一个',
+			'Shift + F3': '搜索上一个',
+			'Ctrl + H': '替换',
+			'Ctrl + Shift + H': '全部替换',
+			'ESC': '隐藏到系统栏',
+			'F1': '打开使用指南',
+			'F11': '切换全屏'
+		}
+		var arrHtml = ['<ul id="shortcut">'];
+		for(var key in mapShortcuts){
+			arrHtml.push('<li><span>'+key.replace('Ctrl', ctrlKey)+'</span>'+mapShortcuts[key]+'</li>');
+		}
+		arrHtml.push('</ul>');
+		dialog.setTitle('快捷键').setContent(arrHtml.join('')).moveTo().show();
 	}
 
 	//显示关于界面
@@ -990,7 +1013,6 @@
 					app.updateHostMenu();
 					app.updateDnsMenu();
 					app.setSysDns();
-					app.updateToolsMenu();
 
 					app.loadCurTheme();
 

@@ -131,6 +131,19 @@ body{
 	height:150px;
 }
 
+#shortcut{
+	margin: 0;
+	padding: 10px;
+}
+#shortcut li{
+	list-style: none;
+	line-height: 26px;
+}
+#shortcut span{
+	display: inline-block;
+	width: 150px;
+}
+
 .preference{
 	min-width:200px;
 }

@@ -4,7 +4,7 @@
 	<name>hostsPlus</name>
 	<filename>hostsPlus</filename>
 	<versionNumber>1.0.2</versionNumber>
-	<versionLabel>1.0.2(build 20151019)</versionLabel>
+	<versionLabel>1.0.2(build 20151021)</versionLabel>
 	<description>
 		<text xml:lang="en">hostsPlus is a editor for hosts file.</text>
 		<text xml:lang="zh-cn">hostsPlus是一个hosts增强编辑软件。</text>

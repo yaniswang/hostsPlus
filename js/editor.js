@@ -162,8 +162,8 @@
 			var text = lineInfo.text;
 			text = text.replace(/^\s*(#!?)?\s*([^\s]+)\s+(.+)/, function(all, comment, ip, others){
 				if(isIp(ip)){
-					var ipLen = /:/.test(ip) ? 41: 16;
-					var space = new Array(ipLen-ip.length+1).join(' ');
+					var ipLen = /:/.test(ip) ? 39: 15;
+					var space = new Array(ipLen-ip.length+2).join(' ');
 					return (comment?comment+' ':'') + ip + space + others;
 				}
 				return all;
